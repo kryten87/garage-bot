@@ -15,4 +15,12 @@ describe('Slack', () => {
   it('should be defined', () => {
     expect(provider).toBeDefined();
   });
+
+  describe('onMessage', () => {
+    // set up message listener: onMessage(pattern, handler)
+  });
+
+  describe('sendText', () => {
+    // send text to an arbitrary user/channel OR as a reply to another message
+  });
 });
