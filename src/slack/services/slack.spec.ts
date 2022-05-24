@@ -44,7 +44,7 @@ describe('Slack', () => {
   });
 
   describe('sendText', () => {
-    // send text to an arbitrary user/channel OR as a reply to another message
+    // send text to an arbitrary user(s)/channel OR as a reply to another message
   });
 
   describe('getUserID', () => {
