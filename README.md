@@ -11,7 +11,7 @@ The Thomas Family home bot -- performs various home tasks via Slack.
 
 #### Slack
 
-Controls communication with Slack via Bolt package.
+Controls communication with Slack via Bolt package. Includes a service which provides the functionality and a controller which handles the in/out.
 
 #### RPi
 
