@@ -29,8 +29,25 @@ export class Slack implements OnModuleInit, OnModuleDestroy {
     this.boltApp.message(pattern, handler);
   }
 
-  sendText(destination: string, message: string): void {
-    // @TODO
+  async sendText(destination: string | string[], text: string): Promise<void> {
+    const users = (
+      await Promise.all(
+        await (Array.isArray(destination) ? destination : [destination]).map(
+          (user) => this.getUserId(user),
+        ),
+      )
+    )
+      .filter(Boolean)
+      .join(',');
+    if (!users || users.length === 0) {
+      throw new Error('cannot send message; no user names provided');
+    }
+    const response = await this.boltApp.client.conversations.open({ users });
+    const channelId = response?.channel?.id;
+    await this.boltApp.client.chat.postMessage({
+      channel: channelId,
+      text,
+    });
   }
 
   async getUserId(displayName: string): Promise<string> {
