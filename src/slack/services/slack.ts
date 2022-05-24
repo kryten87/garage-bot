@@ -5,6 +5,7 @@ import {
   OnModuleInit,
   OnModuleDestroy,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
 interface UserCache {
   [displayName: string]: string;
@@ -14,7 +15,21 @@ interface UserCache {
 export class Slack implements OnModuleInit, OnModuleDestroy {
   private userCache: UserCache = {};
 
-  constructor(@Inject('BOLT_APP') private readonly boltApp: App) {}
+  constructor(
+    private readonly configService: ConfigService,
+    @Inject('BOLT_APP') private boltApp: App | null,
+  ) {
+    this.boltApp =
+      this.boltApp ||
+      new App({
+        token: this.configService.get('SLACK_BOT_TOKEN'),
+        appToken: this.configService.get('SLACK_APP_TOKEN'),
+        signingSecret: this.configService.get('SLACK_SIGNING_SECRET'),
+        socketMode: true,
+        developerMode: this.configService.get('NODE_ENV') !== 'production',
+        port: +this.configService.get('PORT') || 3000,
+      });
+  }
 
   async onModuleInit() {
     // start the bolt app
