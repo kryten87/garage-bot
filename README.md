@@ -21,6 +21,14 @@ Controls interface with the Raspberry Pi hardware.
 
 The brains of the bot. Processes input from Slack and outputs the resulting actions to take. Uses the [@nlpjs/npl](https://www.npmjs.com/package/@nlpjs/nlp) package.
 
+### Milestones
+
+0.1.0 - initial setup, should be able to send/receive Slack messages (user or channel)
+0.2.0 - implement replying to Slack messages
+0.3.0 - initial setup of NLP functionality
+0.4.0 - initial setup of RPi GPIO - sense door open/closed
+0.5.0 - add garage door open/close functionality
+
 ## Installation
 
 ```bash
