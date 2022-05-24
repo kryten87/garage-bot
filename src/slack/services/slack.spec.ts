@@ -11,6 +11,12 @@ describe('Slack', () => {
       users: {
         list: jest.fn(),
       },
+      conversations: {
+        open: jest.fn(),
+      },
+      chat: {
+        postMessage: jest.fn(),
+      },
     },
   };
 
@@ -24,6 +30,8 @@ describe('Slack', () => {
     mockBoltApp.start.mockClear();
     mockBoltApp.message.mockClear();
     mockBoltApp.client.users.list.mockClear();
+    mockBoltApp.client.conversations.open.mockClear();
+    mockBoltApp.client.chat.postMessage.mockClear();
   });
 
   it('should be defined', () => {
@@ -44,7 +52,58 @@ describe('Slack', () => {
   });
 
   describe('sendText', () => {
-    // send text to an arbitrary user(s)/channel OR as a reply to another message
+    const channelId = 'D069C7QFK';
+
+    beforeEach(() => {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore setting private property; ok for testing
+      provider.userCache = {
+        spengler: 'W012A3CDE',
+        'Glinda the Fairly Good': 'W07QCRPA4',
+        Thor: 'W012A3FFF',
+        Starlord: 'W07QCRGGG',
+      };
+
+      mockBoltApp.client.conversations.open.mockResolvedValue({
+        ok: true,
+        channel: { id: channelId },
+      });
+    });
+
+    it('should open the conversation with the appropriate users (multiple)', async () => {
+      await provider.sendText(['Thor', 'Starlord'], 'hello');
+      expect(mockBoltApp.client.conversations.open.mock.calls.length).toBe(1);
+      expect(mockBoltApp.client.conversations.open.mock.calls[0][0]).toEqual({
+        users: 'W012A3FFF,W07QCRGGG',
+      });
+    });
+
+    it('should open the conversation with the appropriate users (single)', async () => {
+      await provider.sendText('Thor', 'hello');
+      expect(mockBoltApp.client.conversations.open.mock.calls.length).toBe(1);
+      expect(mockBoltApp.client.conversations.open.mock.calls[0][0]).toEqual({
+        users: 'W012A3FFF',
+      });
+    });
+
+    it('should post the message to the channel', async () => {
+      const text = `hello from ${Date.now()}`;
+      await provider.sendText(['Thor', 'Starlord'], text);
+      expect(mockBoltApp.client.chat.postMessage.mock.calls.length).toBe(1);
+      expect(mockBoltApp.client.chat.postMessage.mock.calls[0][0]).toEqual({
+        channel: channelId,
+        text,
+      });
+    });
+
+    it('should throw an exception if no users provided', async () => {
+      try {
+        await provider.sendText([], 'hello');
+        throw new Error('this should not happen');
+      } catch (err) {
+        expect(err.message).toContain('no user names provided');
+      }
+    });
   });
 
   describe('getUserID', () => {
