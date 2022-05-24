@@ -1,11 +1,11 @@
 import { App } from '@slack/bolt';
+import { ConfigService } from '@nestjs/config';
 import {
   Injectable,
   Inject,
   OnModuleInit,
   OnModuleDestroy,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 
 interface UserCache {
   [displayName: string]: string;
