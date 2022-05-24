@@ -1,9 +1,9 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { Slack } from './slack';
 import { ConfigService } from '@nestjs/config';
+import { SlackService } from './slack';
+import { Test, TestingModule } from '@nestjs/testing';
 
 describe('Slack', () => {
-  let provider: Slack;
+  let provider: SlackService;
 
   const mockConfigService = {
     get: jest.fn(),
@@ -28,13 +28,13 @@ describe('Slack', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        Slack,
+        SlackService,
         { provide: ConfigService, useValue: mockConfigService },
         { provide: 'BOLT_APP', useValue: mockBoltApp },
       ],
     }).compile();
 
-    provider = module.get<Slack>(Slack);
+    provider = module.get<SlackService>(SlackService);
 
     mockBoltApp.start.mockClear();
     mockBoltApp.message.mockClear();

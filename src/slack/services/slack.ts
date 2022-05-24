@@ -12,7 +12,7 @@ interface UserCache {
 }
 
 @Injectable()
-export class Slack implements OnModuleInit, OnModuleDestroy {
+export class SlackService implements OnModuleInit, OnModuleDestroy {
   private userCache: UserCache = {};
 
   constructor(
