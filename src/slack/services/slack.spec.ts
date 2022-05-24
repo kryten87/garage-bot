@@ -14,12 +14,18 @@ describe('Slack', () => {
     message: jest.fn(),
     client: {
       users: {
+        // bot -- users:read
+        // user -- users:read
         list: jest.fn(),
       },
       conversations: {
+        // bot -- channels:manage, groups:write, im:write, mpim:write
+        // user -- channels:write, groups:write, im:write, mpim:write
         open: jest.fn(),
       },
       chat: {
+        // bot -- chat:write
+        // user -- chat:write, chat:write:user, chat:write:bot
         postMessage: jest.fn(),
       },
     },

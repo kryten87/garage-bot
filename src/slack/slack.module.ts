@@ -8,5 +8,6 @@ import { ConfigService } from '@nestjs/config';
     ConfigService,
     { provide: 'BOLT_APP', useValue: null },
   ],
+  exports: [SlackService],
 })
 export class SlackModule {}
