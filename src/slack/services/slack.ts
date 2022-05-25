@@ -1,17 +1,14 @@
 import { App } from '@slack/bolt';
 import { ConfigService } from '@nestjs/config';
-import {
-  Injectable,
-  Inject,
-  OnModuleInit,
-  OnModuleDestroy,
-} from '@nestjs/common';
+import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
 
+/** The user ID/display name cache */
 interface UserCache {
   [displayName: string]: string;
 }
 
-interface SendOptions {
+/** The options for the sendText method */
+interface SendTextOptions {
   // must have either users OR channel + thread
   users?: string | string[];
   channel?: string;
@@ -20,13 +17,14 @@ interface SendOptions {
 }
 
 @Injectable()
-export class SlackService implements OnModuleInit, OnModuleDestroy {
+export class SlackService implements OnModuleInit {
   private userCache: UserCache = {};
 
   constructor(
     private readonly configService: ConfigService,
     @Inject('BOLT_APP') private boltApp: App | null,
   ) {
+    // instantiate the bolt APP if one is not provided
     this.boltApp =
       this.boltApp ||
       new App({
@@ -43,24 +41,30 @@ export class SlackService implements OnModuleInit, OnModuleDestroy {
     await this.boltApp.start();
   }
 
-  async onModuleDestroy() {
-    // shut down the bolt app
-  }
-
+  /** Set up a listener for messages */
   async onMessage(pattern: string | RegExp, handler: any) {
     this.boltApp.message(pattern, handler);
   }
 
-  async sendText(options: SendOptions): Promise<void> {
-    // async sendText(destination: string | string[], text: string): Promise<void> {
+  /** Send a message */
+  async sendText(options: SendTextOptions): Promise<void> {
     const { thread, channel, text } = options;
+
     let { users } = options;
     users = (Array.isArray(users) ? users : [users]).filter(Boolean);
-
-    if (!thread && (!users || users.length === 0)) {
-      throw new Error(
-        'cannot send message; no user and no channel/thread provided',
-      );
+    const haveUsers = users && users.length > 0;
+    if (haveUsers) {
+      if (channel || thread) {
+        throw new Error(
+          'cannot send message; must provide user OR channel/thread arguments',
+        );
+      }
+    } else {
+      if ((!channel && !thread) || (thread && !channel)) {
+        throw new Error(
+          'cannot send message; must provide user OR channel/thread arguments',
+        );
+      }
     }
 
     users = (await Promise.all(await users.map((user) => this.getUserId(user))))
