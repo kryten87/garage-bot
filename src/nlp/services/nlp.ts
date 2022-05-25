@@ -54,6 +54,9 @@ const answers = [
   [Intent.CloseDoor, 'Got it. Garage door closing.'],
   [Intent.CloseDoor, 'Closing garage door now.'],
   [Intent.CloseDoor, "I'm on it. Closing the door now."],
+
+  [Intent.QueryState, 'One second... checking.'],
+  [Intent.QueryState, 'Hold on a moment while I check.'],
 ];
 
 @Injectable()

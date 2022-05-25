@@ -1,7 +1,7 @@
 import { Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service';
 import { SlackService } from './slack/services/slack';
-import { NlpService } from './nlp/services/nlp';
+import { NlpService, Intent } from './nlp/services/nlp';
 
 @Controller()
 export class AppController {
@@ -28,9 +28,25 @@ export class AppController {
     console.log('..........................');
     const { channel, ts } = message;
     const { intent, score, answer } = await this.nlpService.process(message.text);
+    console.log({ intent, score, answer });
     let text = answer;
     if (!text || score < 0.75) {
       text = 'I\'m not sure what you\'re saying. Can you try again?';
+    } else {
+      switch (intent) {
+        case Intent.OpenDoor:
+          // @TODO open the door
+          break;
+        case Intent.CloseDoor:
+          // @TODO close the door
+          break;
+        case Intent.QueryState:
+          // @TODO get the current state
+          break;
+        default:
+          text = 'I\'m afraid I didn\'t understand that. Can you repeat that please?';
+          break;
+      }
     }
     await this.slackService.sendText({
       channel,
