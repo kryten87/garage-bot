@@ -7,7 +7,9 @@ export class AppController {
   constructor(
     private readonly appService: AppService,
     private readonly slackService: SlackService,
-  ) {}
+  ) {
+    this.slackService.onMessage(/.*/, this.messageHandler);
+  }
 
   @Get()
   async getHello(): Promise<string> {
@@ -16,5 +18,12 @@ export class AppController {
       text: 'this is a test',
     });
     return this.appService.getHello();
+  }
+
+  async messageHandler({ message, say }) {
+    console.log('.......................');
+    console.log(message);
+    console.log('..........................');
+    await say("what's going on?");
   }
 }
