@@ -20,7 +20,7 @@ export class AppController {
     return this.appService.getHello();
   }
 
-  messageHandler = async ({ message, say }) => {
+  messageHandler = async ({ message }) => {
     console.log('.......................');
     console.log(message);
     console.log('..........................');
