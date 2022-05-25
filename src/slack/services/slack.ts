@@ -72,12 +72,12 @@ export class SlackService implements OnModuleInit, OnModuleDestroy {
       const response = await this.boltApp.client.conversations.open({ users });
       channelId = response?.channel?.id;
     }
-    const postOptions: { text: string; channel: string; thread_id?: string } = {
+    const postOptions: { text: string; channel: string; thread_ts?: string } = {
       channel: channelId,
       text,
     };
     if (thread) {
-      postOptions.thread_id = thread;
+      postOptions.thread_ts = thread;
     }
     await this.boltApp.client.chat.postMessage(postOptions);
   }

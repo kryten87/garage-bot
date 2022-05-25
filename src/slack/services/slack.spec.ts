@@ -131,7 +131,7 @@ describe('Slack', () => {
         expect(mockBoltApp.client.chat.postMessage.mock.calls.length).toBe(1);
         expect(mockBoltApp.client.chat.postMessage.mock.calls[0][0]).toEqual({
           channel,
-          thread_id: thread,
+          thread_ts: thread,
           text,
         });
       });
