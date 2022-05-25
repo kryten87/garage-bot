@@ -11,6 +11,12 @@ interface UserCache {
   [displayName: string]: string;
 }
 
+interface SendOptions {
+  users?: string | string[];
+  thread?: string;
+  text: string;
+}
+
 @Injectable()
 export class SlackService implements OnModuleInit, OnModuleDestroy {
   private userCache: UserCache = {};
@@ -44,11 +50,14 @@ export class SlackService implements OnModuleInit, OnModuleDestroy {
     this.boltApp.message(pattern, handler);
   }
 
-  async sendText(destination: string | string[], text: string): Promise<void> {
-    const users = (
+  async sendText(options: SendOptions): Promise<void> {
+    // async sendText(destination: string | string[], text: string): Promise<void> {
+    const { thread, text } = options;
+    let { users } = options;
+    users = (
       await Promise.all(
-        await (Array.isArray(destination) ? destination : [destination]).map(
-          (user) => this.getUserId(user),
+        await (Array.isArray(users) ? users : [users]).map((user) =>
+          this.getUserId(user),
         ),
       )
     )

@@ -11,7 +11,10 @@ export class AppController {
 
   @Get()
   async getHello(): Promise<string> {
-    await this.slackService.sendText('@Dave', 'this is a test');
+    await this.slackService.sendText({
+      users: '@Dave',
+      text: 'this is a test',
+    });
     return this.appService.getHello();
   }
 }

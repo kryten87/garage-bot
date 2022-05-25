@@ -86,7 +86,7 @@ describe('Slack', () => {
     });
 
     it('should open the conversation with the appropriate users (multiple)', async () => {
-      await provider.sendText(['Thor', 'Starlord'], 'hello');
+      await provider.sendText({ users: ['Thor', 'Starlord'], text: 'hello' });
       expect(mockBoltApp.client.conversations.open.mock.calls.length).toBe(1);
       expect(mockBoltApp.client.conversations.open.mock.calls[0][0]).toEqual({
         users: 'W012A3FFF,W07QCRGGG',
@@ -94,7 +94,7 @@ describe('Slack', () => {
     });
 
     it('should open the conversation with the appropriate users (single)', async () => {
-      await provider.sendText('Thor', 'hello');
+      await provider.sendText({ users: 'Thor', text: 'hello' });
       expect(mockBoltApp.client.conversations.open.mock.calls.length).toBe(1);
       expect(mockBoltApp.client.conversations.open.mock.calls[0][0]).toEqual({
         users: 'W012A3FFF',
@@ -103,7 +103,7 @@ describe('Slack', () => {
 
     it('should post the message to the channel', async () => {
       const text = `hello from ${Date.now()}`;
-      await provider.sendText(['Thor', 'Starlord'], text);
+      await provider.sendText({ users: ['Thor', 'Starlord'], text });
       expect(mockBoltApp.client.chat.postMessage.mock.calls.length).toBe(1);
       expect(mockBoltApp.client.chat.postMessage.mock.calls[0][0]).toEqual({
         channel: channelId,
@@ -113,7 +113,7 @@ describe('Slack', () => {
 
     it('should throw an exception if no users provided', async () => {
       try {
-        await provider.sendText([], 'hello');
+        await provider.sendText({ users: [], text: 'hello' });
         throw new Error('this should not happen');
       } catch (err) {
         expect(err.message).toContain('no user names provided');
