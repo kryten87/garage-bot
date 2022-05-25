@@ -20,10 +20,15 @@ export class AppController {
     return this.appService.getHello();
   }
 
-  async messageHandler({ message, say }) {
+  messageHandler = async ({ message, say }) => {
     console.log('.......................');
     console.log(message);
     console.log('..........................');
-    await say("what's going on?");
-  }
+    const { channel, ts } = message;
+    await this.slackService.sendText({
+      channel,
+      thread: ts,
+      text: 'this should be a reply!',
+    });
+  };
 }
