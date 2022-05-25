@@ -16,6 +16,8 @@ Controls communication with Slack via Bolt package. Includes a service which pro
 #### RPi
 
 Controls interface with the Raspberry Pi hardware.
+Use [rpi-gpio](https://github.com/JamesBarwell/rpi-gpio.js)?
+Or [rpio](https://github.com/jperkin/node-rpio)?
 
 #### Bot
 
