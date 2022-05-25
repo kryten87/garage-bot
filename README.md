@@ -28,6 +28,7 @@ The brains of the bot. Processes input from Slack and outputs the resulting acti
 0.2.0 - implement replying to Slack messages
   - Replying done ✅
 0.3.0 - initial setup of NLP functionality
+  - Done ✅
 0.4.0 - initial setup of RPi GPIO - sense door open/closed
 0.5.0 - add garage door open/close functionality
 
