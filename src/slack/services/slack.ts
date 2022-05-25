@@ -12,7 +12,9 @@ interface UserCache {
 }
 
 interface SendOptions {
+  // must have either users OR channel + thread
   users?: string | string[];
+  channel?: string;
   thread?: string;
   text: string;
 }
@@ -38,7 +40,6 @@ export class SlackService implements OnModuleInit, OnModuleDestroy {
   }
 
   async onModuleInit() {
-    // start the bolt app
     await this.boltApp.start();
   }
 
@@ -46,32 +47,39 @@ export class SlackService implements OnModuleInit, OnModuleDestroy {
     // shut down the bolt app
   }
 
-  onMessage(pattern: string | RegExp, handler: any) {
+  async onMessage(pattern: string | RegExp, handler: any) {
     this.boltApp.message(pattern, handler);
   }
 
   async sendText(options: SendOptions): Promise<void> {
     // async sendText(destination: string | string[], text: string): Promise<void> {
-    const { thread, text } = options;
+    const { thread, channel, text } = options;
     let { users } = options;
-    users = (
-      await Promise.all(
-        await (Array.isArray(users) ? users : [users]).map((user) =>
-          this.getUserId(user),
-        ),
-      )
-    )
+    users = (Array.isArray(users) ? users : [users]).filter(Boolean);
+
+    if (!thread && (!users || users.length === 0)) {
+      throw new Error(
+        'cannot send message; no user and no channel/thread provided',
+      );
+    }
+
+    users = (await Promise.all(await users.map((user) => this.getUserId(user))))
       .filter(Boolean)
       .join(',');
-    if (!users || users.length === 0) {
-      throw new Error('cannot send message; no user names provided');
+
+    let channelId = channel;
+    if (users) {
+      const response = await this.boltApp.client.conversations.open({ users });
+      channelId = response?.channel?.id;
     }
-    const response = await this.boltApp.client.conversations.open({ users });
-    const channelId = response?.channel?.id;
-    await this.boltApp.client.chat.postMessage({
+    const postOptions: { text: string; channel: string; thread_id?: string } = {
       channel: channelId,
       text,
-    });
+    };
+    if (thread) {
+      postOptions.thread_id = thread;
+    }
+    await this.boltApp.client.chat.postMessage(postOptions);
   }
 
   async getUserId(displayName: string): Promise<string> {
