@@ -25,6 +25,7 @@
     "@nestjs/config": "^2.0.1",
     "@nestjs/core": "^8.0.0",
     "@nestjs/platform-express": "^8.0.0",
+    "@nlpjs/nlp": "^4.23.5",
     "@slack/bolt": "^3.11.1",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
