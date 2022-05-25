@@ -1,4 +1,4 @@
-import { NlpService } from './nlp';
+import { NlpService, Intent } from './nlp';
 import { Test, TestingModule } from '@nestjs/testing';
 
 describe('Nlp', () => {
@@ -22,7 +22,7 @@ describe('Nlp', () => {
   describe('process', () => {
     it('should remap the results to the expected values', async () => {
       const response = await provider.process('close the door');
-      expect(response.intent).toBe('action.garage.close');
+      expect(response.intent).toBe(Intent.CloseDoor);
       expect(response.score).toBe(1);
       expect(response.answer).not.toBeUndefined();
     });
