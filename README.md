@@ -29,8 +29,9 @@ The brains of the bot. Processes input from Slack and outputs the resulting acti
   - Replying done ✅
 0.3.0 - initial setup of NLP functionality
   - Done ✅
-0.4.0 - initial setup of RPi GPIO - sense door open/closed
-0.5.0 - add garage door open/close functionality
+0.4.0 - controller tests
+0.5.0 - initial setup of RPi GPIO - sense door open/closed
+0.6.0 - add garage door open/close functionality
 
 ### Future
 
