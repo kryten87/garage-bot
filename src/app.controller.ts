@@ -8,7 +8,7 @@ export class AppController {
   constructor(
     private readonly appService: AppService,
     private readonly slackService: SlackService,
-    private readonly nlpService: NlpService
+    private readonly nlpService: NlpService,
   ) {
     this.slackService.onMessage(/.*/, this.messageHandler);
   }
@@ -27,11 +27,13 @@ export class AppController {
     console.log(message);
     console.log('..........................');
     const { channel, ts } = message;
-    const { intent, score, answer } = await this.nlpService.process(message.text);
+    const { intent, score, answer } = await this.nlpService.process(
+      message.text,
+    );
     console.log({ intent, score, answer });
     let text = answer;
     if (!text || score < 0.75) {
-      text = 'I\'m not sure what you\'re saying. Can you try again?';
+      text = "I'm not sure what you're saying. Can you try again?";
     } else {
       switch (intent) {
         case Intent.OpenDoor:
@@ -44,7 +46,8 @@ export class AppController {
           // @TODO get the current state
           break;
         default:
-          text = 'I\'m afraid I didn\'t understand that. Can you repeat that please?';
+          text =
+            "I'm afraid I didn't understand that. Can you repeat that please?";
           break;
       }
     }

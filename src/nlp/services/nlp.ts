@@ -6,7 +6,7 @@ export enum Intent {
   OpenDoor = 'OPEN_DOOR',
   CloseDoor = 'CLOSE_DOOR',
   QueryState = 'QUERY_STATE',
-};
+}
 
 const documents = [
   ['hello', Intent.Greeting],
