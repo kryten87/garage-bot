@@ -68,6 +68,7 @@ describe('Slack', () => {
 
   describe('sendText', () => {
     const channelId = 'D069C7QFK';
+    const thread = '123456.654321';
 
     beforeEach(() => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -85,13 +86,59 @@ describe('Slack', () => {
       });
     });
 
-    it('should throw an exception if no users & no channel+thread arguments', async () => {
-      try {
-        await provider.sendText({ text: 'hello' });
-        throw new Error('this should not happen');
-      } catch (err) {
-        expect(err.message).toContain('no user and no channel/thread provided');
-      }
+    describe('argument validation', () => {
+      it('should throw an exception if no users & no channel+thread arguments', async () => {
+        try {
+          await provider.sendText({ text: 'hello' });
+          throw new Error('this should not happen');
+        } catch (err) {
+          expect(err.message).toContain(
+            'must provide user OR channel/thread arguments',
+          );
+        }
+      });
+
+      it('should throw an exception if users AND channel/thread arguments', async () => {
+        try {
+          await provider.sendText({
+            users: '@Thor',
+            channel: channelId,
+            thread,
+            text: 'hello',
+          });
+          throw new Error('this should not happen');
+        } catch (err) {
+          expect(err.message).toContain(
+            'must provide user OR channel/thread arguments',
+          );
+        }
+      });
+
+      it('should throw an exception if users AND channel arguments', async () => {
+        try {
+          await provider.sendText({
+            users: '@Thor',
+            channel: channelId,
+            text: 'hello',
+          });
+          throw new Error('this should not happen');
+        } catch (err) {
+          expect(err.message).toContain(
+            'must provide user OR channel/thread arguments',
+          );
+        }
+      });
+
+      it('should throw an exception if thread with no channel', async () => {
+        try {
+          await provider.sendText({ thread, text: 'hello' });
+          throw new Error('this should not happen');
+        } catch (err) {
+          expect(err.message).toContain(
+            'must provide user OR channel/thread arguments',
+          );
+        }
+      });
     });
 
     describe('users', () => {
