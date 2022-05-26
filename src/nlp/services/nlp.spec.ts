@@ -1,3 +1,4 @@
+import { ConfigService } from '@nestjs/config';
 import { NlpService, Intent } from './nlp';
 import { Test, TestingModule } from '@nestjs/testing';
 
@@ -6,7 +7,7 @@ describe('Nlp', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [NlpService],
+      providers: [NlpService, ConfigService],
     }).compile();
 
     provider = module.get<NlpService>(NlpService);

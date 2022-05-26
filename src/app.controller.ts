@@ -1,7 +1,7 @@
-import { Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service';
-import { SlackService } from './slack/services/slack';
+import { Controller, Get } from '@nestjs/common';
 import { NlpService, Intent } from './nlp/services/nlp';
+import { SlackService } from './slack/services/slack';
 
 @Controller()
 export class AppController {
