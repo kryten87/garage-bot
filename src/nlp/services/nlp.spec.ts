@@ -11,9 +11,7 @@ describe('Nlp', () => {
     }).compile();
 
     provider = module.get<NlpService>(NlpService);
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore calling private method; ok for testing
-    await provider.initialize();
+    await provider.onModuleInit();
   });
 
   it('should be defined', () => {
