@@ -53,6 +53,13 @@ describe('Slack', () => {
     expect(provider).toBeDefined();
   });
 
+  describe('onModuleInit', () => {
+    it('should start the bolt app', async () => {
+      await provider.onModuleInit();
+      expect(mockBoltApp.start.mock.calls.length).toBe(1);
+    });
+  });
+
   describe('onMessage', () => {
     // set up message listener: onMessage(pattern, handler)
     it('should set up the message handler', () => {

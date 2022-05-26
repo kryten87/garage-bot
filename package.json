@@ -1,6 +1,6 @@
 {
   "name": "home-bot",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "",
   "author": "",
   "private": true,
@@ -25,9 +25,8 @@
     "@nestjs/config": "^2.0.1",
     "@nestjs/core": "^8.0.0",
     "@nestjs/platform-express": "^8.0.0",
-    "@nlpjs/basic": "^4.23.5",
-    "@nlpjs/nlp": "^4.23.5",
     "@slack/bolt": "^3.11.1",
+    "node-nlp": "^4.24.0",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^7.2.0"

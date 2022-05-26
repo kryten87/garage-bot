@@ -1,3 +1,4 @@
+import { ConfigService } from '@nestjs/config';
 import { NlpService, Intent } from './nlp';
 import { Test, TestingModule } from '@nestjs/testing';
 
@@ -6,13 +7,11 @@ describe('Nlp', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [NlpService],
+      providers: [NlpService, ConfigService],
     }).compile();
 
     provider = module.get<NlpService>(NlpService);
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore calling private method; ok for testing
-    await provider.initialize();
+    await provider.onModuleInit();
   });
 
   it('should be defined', () => {
