@@ -1,22 +1,166 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { SlackService } from './slack/services/slack';
+import { NlpService, Intent } from './nlp/services/nlp';
 
 describe('AppController', () => {
   let appController: AppController;
 
+  const mockNlpService = {
+    process: jest.fn(),
+  };
+
+  const mockSlackService = {
+    onMessage: jest.fn(),
+    sendText: jest.fn(),
+  };
+
   beforeEach(async () => {
+    mockNlpService.process.mockClear();
+    mockSlackService.sendText.mockClear();
+
     const app: TestingModule = await Test.createTestingModule({
       controllers: [AppController],
-      providers: [AppService],
+      providers: [
+        AppService,
+        { provide: NlpService, useValue: mockNlpService },
+        { provide: SlackService, useValue: mockSlackService },
+      ],
     }).compile();
 
     appController = app.get<AppController>(AppController);
   });
 
-  describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!');
+  describe('messageHandler', () => {
+    it('should correctly handle a Greeting message', async () => {
+      const channel = 'A123456';
+      const ts = '123456.654321';
+
+      const intent = Intent.Greeting;
+      const score = 1;
+      const answer = 'Hello there!';
+
+      const event = {
+        message: {
+          channel,
+          ts,
+          text: 'Hello!',
+        },
+      };
+
+      mockNlpService.process.mockResolvedValue({ intent, score, answer });
+
+      await appController.messageHandler(event);
+
+      expect(mockNlpService.process.mock.calls.length).toBe(1);
+      expect(mockNlpService.process.mock.calls[0][0]).toBe(event.message.text);
+
+      expect(mockSlackService.sendText.mock.calls.length).toBe(1);
+      expect(mockSlackService.sendText.mock.calls[0][0]).toEqual({
+        channel,
+        thread: ts,
+        text: answer,
+      });
+    });
+
+    it('should correctly handle an OpenDoor message', async () => {
+      const channel = 'A123456';
+      const ts = '123456.654321';
+
+      const intent = Intent.OpenDoor;
+      const score = 1;
+      const answer = 'Opening door now';
+
+      const event = {
+        message: {
+          channel,
+          ts,
+          text: 'open the pod bay doors, Hal',
+        },
+      };
+
+      mockNlpService.process.mockResolvedValue({ intent, score, answer });
+
+      await appController.messageHandler(event);
+
+      expect(mockNlpService.process.mock.calls.length).toBe(1);
+      expect(mockNlpService.process.mock.calls[0][0]).toBe(event.message.text);
+
+      expect(mockSlackService.sendText.mock.calls.length).toBe(1);
+      expect(mockSlackService.sendText.mock.calls[0][0]).toEqual({
+        channel,
+        thread: ts,
+        text: answer,
+      });
+
+      // @TODO add test for GPIO
+    });
+
+    it('should correctly handle a CloseDoor message', async () => {
+      const channel = 'A123456';
+      const ts = '123456.654321';
+
+      const intent = Intent.CloseDoor;
+      const score = 1;
+      const answer = 'Closing door now';
+
+      const event = {
+        message: {
+          channel,
+          ts,
+          text: 'close the damn door',
+        },
+      };
+
+      mockNlpService.process.mockResolvedValue({ intent, score, answer });
+
+      await appController.messageHandler(event);
+
+      expect(mockNlpService.process.mock.calls.length).toBe(1);
+      expect(mockNlpService.process.mock.calls[0][0]).toBe(event.message.text);
+
+      expect(mockSlackService.sendText.mock.calls.length).toBe(1);
+      expect(mockSlackService.sendText.mock.calls[0][0]).toEqual({
+        channel,
+        thread: ts,
+        text: answer,
+      });
+
+      // @TODO add test for GPIO
+    });
+
+    it('should correctly handle a QueryState message', async () => {
+      const channel = 'A123456';
+      const ts = '123456.654321';
+
+      const intent = Intent.QueryState;
+      const score = 1;
+      const answer = 'It is open';
+
+      const event = {
+        message: {
+          channel,
+          ts,
+          text: 'is the door open?',
+        },
+      };
+
+      mockNlpService.process.mockResolvedValue({ intent, score, answer });
+
+      await appController.messageHandler(event);
+
+      expect(mockNlpService.process.mock.calls.length).toBe(1);
+      expect(mockNlpService.process.mock.calls[0][0]).toBe(event.message.text);
+
+      expect(mockSlackService.sendText.mock.calls.length).toBe(1);
+      expect(mockSlackService.sendText.mock.calls[0][0]).toEqual({
+        channel,
+        thread: ts,
+        text: answer,
+      });
+
+      // @TODO add test for GPIO
     });
   });
 });
