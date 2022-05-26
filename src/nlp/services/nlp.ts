@@ -1,5 +1,8 @@
-import { dockStart } from '@nlpjs/basic';
+import { ConfigService } from '@nestjs/config';
 import { Injectable, OnModuleInit } from '@nestjs/common';
+import { NlpManager } from 'node-nlp';
+
+const locale = 'en';
 
 export enum Intent {
   Greeting = 'GREETING',
@@ -63,29 +66,40 @@ const answers = [
 export class NlpService implements OnModuleInit {
   private nlp;
 
+  constructor(private configService: ConfigService) {}
+
   async onModuleInit() {
     return this.initialize();
   }
 
   private async initialize() {
-    const dock = await dockStart({ use: ['Basic'] });
-    this.nlp = dock.get('nlp');
-    this.nlp.addLanguage('en');
+    const env = this.configService.get<string>('NODE_ENV');
+    this.nlp = new NlpManager({
+      autoSave: false,
+      languages: [locale],
+      forceNER: false,
+      nlu: {
+        useNoneFeature: false,
+        log: env !== 'production' && env !== 'test',
+        spellCheck: true,
+      },
+      ner: { threshold: 0.9 },
+    });
     await this.train();
   }
 
   private async train() {
     documents.forEach(([utterance, intent]) =>
-      this.nlp.addDocument('en', utterance, intent),
+      this.nlp.addDocument(locale, utterance, intent),
     );
     answers.forEach(([intent, response]) =>
-      this.nlp.addAnswer('en', intent, response),
+      this.nlp.addAnswer(locale, intent, response),
     );
     await this.nlp.train();
   }
 
   async process(utterance: string): Promise<any> {
-    const result = await this.nlp.process('en', utterance);
+    const result = await this.nlp.process(locale, utterance);
     return {
       intent: result.intent,
       score: result.score,
