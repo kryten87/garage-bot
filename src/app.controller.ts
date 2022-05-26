@@ -23,19 +23,17 @@ export class AppController {
   }
 
   messageHandler = async ({ message }) => {
-    console.log('.......................');
-    console.log(message);
-    console.log('..........................');
     const { channel, ts } = message;
     const { intent, score, answer } = await this.nlpService.process(
       message.text,
     );
-    console.log({ intent, score, answer });
     let text = answer;
     if (!text || score < 0.75) {
       text = "I'm not sure what you're saying. Can you try again?";
     } else {
       switch (intent) {
+        case Intent.Greeting:
+          break;
         case Intent.OpenDoor:
           // @TODO open the door
           break;
