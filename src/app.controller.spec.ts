@@ -18,6 +18,7 @@ describe('AppController', () => {
 
   beforeEach(async () => {
     mockNlpService.process.mockClear();
+    mockSlackService.onMessage.mockClear();
     mockSlackService.sendText.mockClear();
 
     const app: TestingModule = await Test.createTestingModule({
@@ -33,6 +34,11 @@ describe('AppController', () => {
   });
 
   describe('messageHandler', () => {
+    it('should correctly initialize the handler on instantiation', async () => {
+      expect(mockSlackService.onMessage.mock.calls.length).toBe(1);
+      expect(mockSlackService.onMessage.mock.calls[0][1]).toEqual(appController.messageHandler);
+    });
+
     it('should correctly respond to a Greeting message', async () => {
       const channel = 'A123456';
       const ts = '123456.654321';
