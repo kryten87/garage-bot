@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { ConfigService } from '@nestjs/config';
-import { GpioService, POLLING_INTERVAL } from './gpio';
+import { GpioService } from './gpio';
 import { Test, TestingModule } from '@nestjs/testing';
 
 const pause = (duration: number): Promise<void> =>
@@ -72,7 +72,7 @@ describe('Gpio', () => {
       // read = 0
       mockRpio.read.mockReturnValue(0);
       // wait for the polling interval + 5 ms
-      await pause(POLLING_INTERVAL + 5);
+      await pause(pollingInterval + 5);
       // @ts-ignore checking private property; ok for testing
       expect(provider.inputState[doorPin]).toEqual([0, 0, 0]);
       expect(handler.mock.calls.length).toBe(0);
@@ -80,7 +80,7 @@ describe('Gpio', () => {
       // read = 1
       mockRpio.read.mockReturnValue(1);
       // wait for the polling interval + 5 ms
-      await pause(POLLING_INTERVAL + 5);
+      await pause(pollingInterval + 5);
       // @ts-ignore checking private property; ok for testing
       expect(provider.inputState[doorPin]).toEqual([0, 0, 1]);
       expect(handler.mock.calls.length).toBe(0);
@@ -88,7 +88,7 @@ describe('Gpio', () => {
       // read = 1
       mockRpio.read.mockReturnValue(1);
       // wait for the polling interval + 5 ms
-      await pause(POLLING_INTERVAL + 5);
+      await pause(pollingInterval + 5);
       // @ts-ignore checking private property; ok for testing
       expect(provider.inputState[doorPin]).toEqual([0, 1, 1]);
       expect(handler.mock.calls.length).toBe(0);
@@ -96,7 +96,7 @@ describe('Gpio', () => {
       // read = 1
       mockRpio.read.mockReturnValue(1);
       // wait for the polling interval + 5 ms
-      await pause(POLLING_INTERVAL + 5);
+      await pause(pollingInterval + 5);
       // @ts-ignore checking private property; ok for testing
       expect(provider.inputState[doorPin]).toEqual([1, 1, 1]);
       expect(handler.mock.calls.length).toBe(1);
@@ -105,7 +105,7 @@ describe('Gpio', () => {
       // read = 1
       mockRpio.read.mockReturnValue(1);
       // wait for the polling interval + 5 ms
-      await pause(POLLING_INTERVAL + 5);
+      await pause(pollingInterval + 5);
       // @ts-ignore checking private property; ok for testing
       expect(provider.inputState[doorPin]).toEqual([1, 1, 1]);
       expect(handler.mock.calls.length).toBe(1);
@@ -113,7 +113,7 @@ describe('Gpio', () => {
       // read = 0
       mockRpio.read.mockReturnValue(0);
       // wait for the polling interval + 5 ms
-      await pause(POLLING_INTERVAL + 5);
+      await pause(pollingInterval + 5);
       // @ts-ignore checking private property; ok for testing
       expect(provider.inputState[doorPin]).toEqual([1, 1, 0]);
       expect(handler.mock.calls.length).toBe(1);
@@ -121,7 +121,7 @@ describe('Gpio', () => {
       // read = 0
       mockRpio.read.mockReturnValue(0);
       // wait for the polling interval + 5 ms
-      await pause(POLLING_INTERVAL + 5);
+      await pause(pollingInterval + 5);
       // @ts-ignore checking private property; ok for testing
       expect(provider.inputState[doorPin]).toEqual([1, 0, 0]);
       expect(handler.mock.calls.length).toBe(1);
@@ -129,7 +129,7 @@ describe('Gpio', () => {
       // read = 0
       mockRpio.read.mockReturnValue(0);
       // wait for the polling interval + 5 ms
-      await pause(POLLING_INTERVAL + 5);
+      await pause(pollingInterval + 5);
       // @ts-ignore checking private property; ok for testing
       expect(provider.inputState[doorPin]).toEqual([0, 0, 0]);
       expect(handler.mock.calls.length).toBe(2);
