@@ -29,7 +29,9 @@ export class AppController {
   async getHello(): Promise<string> {
     await this.slackService.sendText({
       users: '@Dave',
-      text: `:smile: A test message (normally this would go to ${JSON.stringify(this.messageRecipients)})`,
+      text: `:smile: A test message (normally this would go to ${JSON.stringify(
+        this.messageRecipients,
+      )})`,
     });
     return this.appService.getHello();
   }
