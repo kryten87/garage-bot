@@ -1,24 +1,31 @@
+import { ConfigService } from '@nestjs/config';
 import {
-  Injectable,
   Inject,
-  OnModuleInit,
+  Injectable,
   OnModuleDestroy,
+  OnModuleInit,
 } from '@nestjs/common';
 
 export const POLLING_INTERVAL = 100;
 
-export const DOOR_SWITCH = 15; // @TODO figure out which pin to use
-
 @Injectable()
 export class GpioService implements OnModuleInit, OnModuleDestroy {
   private timeHandle: NodeJS.Timeout;
+  private doorSensorPin: number;
   private doorEventHandler: any[] = [];
-  private currentState: { [DOOR_SWITCH]: number } = { [DOOR_SWITCH]: 0 };
-  private inputState: { [DOOR_SWITCH]: number[] } = {
-    [DOOR_SWITCH]: [0, 0, 0],
-  };
+  private currentState: { [pin: number]: number } = {};
+  private inputState: { [pin: number]: number[] } = {};
 
-  constructor(@Inject('RPIO') private readonly rpio: any) {
+  constructor(
+    private readonly configService: ConfigService,
+    @Inject('RPIO') private readonly rpio: any,
+  ) {
+    // initialize the service state
+    this.doorSensorPin = this.configService.get<number>('GPIO_DOOR_SENSOR');
+    this.currentState[this.doorSensorPin] = 0;
+    this.inputState[this.doorSensorPin] = [0, 0, 0];
+
+    // start polling
     this.timeHandle = setTimeout(
       () => this.pollDoor.call(this),
       POLLING_INTERVAL,
@@ -26,7 +33,8 @@ export class GpioService implements OnModuleInit, OnModuleDestroy {
   }
 
   async onModuleInit() {
-    this.rpio.open(DOOR_SWITCH, rpio.INPUT);
+    // set the door switch for input
+    this.rpio.open(this.doorSensorPin, rpio.INPUT);
     // @TODO set up pins for output here
   }
 
@@ -42,19 +50,21 @@ export class GpioService implements OnModuleInit, OnModuleDestroy {
 
   private pollDoor() {
     // get the current state & add it to the list
-    this.inputState[DOOR_SWITCH].push(this.rpio.read(DOOR_SWITCH));
-    if (this.inputState[DOOR_SWITCH].length > 3) {
-      this.inputState[DOOR_SWITCH].shift();
+    this.inputState[this.doorSensorPin].push(
+      this.rpio.read(this.doorSensorPin),
+    );
+    if (this.inputState[this.doorSensorPin].length > 3) {
+      this.inputState[this.doorSensorPin].shift();
     }
 
     let current: number | null = null;
-    if (this.inputState[DOOR_SWITCH].join('') === '111') {
+    if (this.inputState[this.doorSensorPin].join('') === '111') {
       current = 1;
-    } else if (this.inputState[DOOR_SWITCH].join('') === '000') {
+    } else if (this.inputState[this.doorSensorPin].join('') === '000') {
       current = 0;
     }
-    if (current !== null && current !== this.currentState[DOOR_SWITCH]) {
-      this.currentState[DOOR_SWITCH] = current;
+    if (current !== null && current !== this.currentState[this.doorSensorPin]) {
+      this.currentState[this.doorSensorPin] = current;
       this.doorEventHandler.forEach((handler) => handler(current));
     }
 
