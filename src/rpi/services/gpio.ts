@@ -6,10 +6,9 @@ import {
   OnModuleInit,
 } from '@nestjs/common';
 
-export const POLLING_INTERVAL = 100;
-
 @Injectable()
 export class GpioService implements OnModuleInit, OnModuleDestroy {
+  private pollingInterval: number;
   private timeHandle: NodeJS.Timeout;
   private doorSensorPin: number;
   private doorEventHandler: any[] = [];
@@ -21,6 +20,9 @@ export class GpioService implements OnModuleInit, OnModuleDestroy {
     @Inject('RPIO') private readonly rpio: any,
   ) {
     // initialize the service state
+    this.pollingInterval = this.configService.get<number>(
+      'SENSOR_POLLING_INTERVAL',
+    );
     this.doorSensorPin = this.configService.get<number>('GPIO_DOOR_SENSOR');
     this.currentState[this.doorSensorPin] = 0;
     this.inputState[this.doorSensorPin] = [0, 0, 0];
@@ -28,7 +30,7 @@ export class GpioService implements OnModuleInit, OnModuleDestroy {
     // start polling
     this.timeHandle = setTimeout(
       () => this.pollDoor.call(this),
-      POLLING_INTERVAL,
+      this.pollingInterval,
     );
   }
 
@@ -70,7 +72,7 @@ export class GpioService implements OnModuleInit, OnModuleDestroy {
 
     this.timeHandle = setTimeout(
       () => this.pollDoor.call(this),
-      POLLING_INTERVAL,
+      this.pollingInterval,
     );
   }
 }
