@@ -33,7 +33,7 @@ describe('AppController', () => {
   });
 
   describe('messageHandler', () => {
-    it('should correctly handle a Greeting message', async () => {
+    it('should correctly respond to a Greeting message', async () => {
       const channel = 'A123456';
       const ts = '123456.654321';
 
@@ -64,7 +64,7 @@ describe('AppController', () => {
       });
     });
 
-    it('should correctly handle an OpenDoor message', async () => {
+    it('should correctly respond to an OpenDoor message', async () => {
       const channel = 'A123456';
       const ts = '123456.654321';
 
@@ -97,7 +97,7 @@ describe('AppController', () => {
       // @TODO add test for GPIO
     });
 
-    it('should correctly handle a CloseDoor message', async () => {
+    it('should correctly respond to a CloseDoor message', async () => {
       const channel = 'A123456';
       const ts = '123456.654321';
 
@@ -130,7 +130,7 @@ describe('AppController', () => {
       // @TODO add test for GPIO
     });
 
-    it('should correctly handle a QueryState message', async () => {
+    it('should correctly respond to a QueryState message', async () => {
       const channel = 'A123456';
       const ts = '123456.654321';
 
