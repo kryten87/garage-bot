@@ -1,12 +1,21 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
+import { ConfigService } from '@nestjs/config';
+import { GpioService, POLLING_INTERVAL } from './gpio';
 import { Test, TestingModule } from '@nestjs/testing';
-import { GpioService, DOOR_SWITCH, POLLING_INTERVAL } from './gpio';
 
 const pause = (duration: number): Promise<void> =>
   new Promise((resolve) => setTimeout(resolve, duration));
 
 describe('Gpio', () => {
   let provider: GpioService;
+
+  const doorPin = 17;
+  const pollingInterval = 100;
+
+  const mockConfig = {
+    get: (key: string): string | number =>
+      key === 'GPIO_DOOR_SENSOR' ? doorPin : pollingInterval,
+  };
 
   const mockRpio = {
     open: jest.fn(),
@@ -15,7 +24,11 @@ describe('Gpio', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [GpioService, { provide: 'RPIO', useValue: mockRpio }],
+      providers: [
+        GpioService,
+        { provide: ConfigService, useValue: mockConfig },
+        { provide: 'RPIO', useValue: mockRpio },
+      ],
     }).compile();
 
     provider = module.get<GpioService>(GpioService);
@@ -54,14 +67,14 @@ describe('Gpio', () => {
 
       // array is empty to start
       // @ts-ignore checking private property; ok for testing
-      expect(provider.inputState[DOOR_SWITCH]).toEqual([0, 0, 0]);
+      expect(provider.inputState[doorPin]).toEqual([0, 0, 0]);
 
       // read = 0
       mockRpio.read.mockReturnValue(0);
       // wait for the polling interval + 5 ms
       await pause(POLLING_INTERVAL + 5);
       // @ts-ignore checking private property; ok for testing
-      expect(provider.inputState[DOOR_SWITCH]).toEqual([0, 0, 0]);
+      expect(provider.inputState[doorPin]).toEqual([0, 0, 0]);
       expect(handler.mock.calls.length).toBe(0);
 
       // read = 1
@@ -69,7 +82,7 @@ describe('Gpio', () => {
       // wait for the polling interval + 5 ms
       await pause(POLLING_INTERVAL + 5);
       // @ts-ignore checking private property; ok for testing
-      expect(provider.inputState[DOOR_SWITCH]).toEqual([0, 0, 1]);
+      expect(provider.inputState[doorPin]).toEqual([0, 0, 1]);
       expect(handler.mock.calls.length).toBe(0);
 
       // read = 1
@@ -77,7 +90,7 @@ describe('Gpio', () => {
       // wait for the polling interval + 5 ms
       await pause(POLLING_INTERVAL + 5);
       // @ts-ignore checking private property; ok for testing
-      expect(provider.inputState[DOOR_SWITCH]).toEqual([0, 1, 1]);
+      expect(provider.inputState[doorPin]).toEqual([0, 1, 1]);
       expect(handler.mock.calls.length).toBe(0);
 
       // read = 1
@@ -85,7 +98,7 @@ describe('Gpio', () => {
       // wait for the polling interval + 5 ms
       await pause(POLLING_INTERVAL + 5);
       // @ts-ignore checking private property; ok for testing
-      expect(provider.inputState[DOOR_SWITCH]).toEqual([1, 1, 1]);
+      expect(provider.inputState[doorPin]).toEqual([1, 1, 1]);
       expect(handler.mock.calls.length).toBe(1);
       expect(handler.mock.calls[0][0]).toBe(1);
 
@@ -94,7 +107,7 @@ describe('Gpio', () => {
       // wait for the polling interval + 5 ms
       await pause(POLLING_INTERVAL + 5);
       // @ts-ignore checking private property; ok for testing
-      expect(provider.inputState[DOOR_SWITCH]).toEqual([1, 1, 1]);
+      expect(provider.inputState[doorPin]).toEqual([1, 1, 1]);
       expect(handler.mock.calls.length).toBe(1);
 
       // read = 0
@@ -102,7 +115,7 @@ describe('Gpio', () => {
       // wait for the polling interval + 5 ms
       await pause(POLLING_INTERVAL + 5);
       // @ts-ignore checking private property; ok for testing
-      expect(provider.inputState[DOOR_SWITCH]).toEqual([1, 1, 0]);
+      expect(provider.inputState[doorPin]).toEqual([1, 1, 0]);
       expect(handler.mock.calls.length).toBe(1);
 
       // read = 0
@@ -110,7 +123,7 @@ describe('Gpio', () => {
       // wait for the polling interval + 5 ms
       await pause(POLLING_INTERVAL + 5);
       // @ts-ignore checking private property; ok for testing
-      expect(provider.inputState[DOOR_SWITCH]).toEqual([1, 0, 0]);
+      expect(provider.inputState[doorPin]).toEqual([1, 0, 0]);
       expect(handler.mock.calls.length).toBe(1);
 
       // read = 0
@@ -118,7 +131,7 @@ describe('Gpio', () => {
       // wait for the polling interval + 5 ms
       await pause(POLLING_INTERVAL + 5);
       // @ts-ignore checking private property; ok for testing
-      expect(provider.inputState[DOOR_SWITCH]).toEqual([0, 0, 0]);
+      expect(provider.inputState[doorPin]).toEqual([0, 0, 0]);
       expect(handler.mock.calls.length).toBe(2);
       expect(handler.mock.calls[1][0]).toBe(0);
     });
