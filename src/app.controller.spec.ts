@@ -17,6 +17,7 @@ describe('AppController', () => {
 
   const mockGpioService = {
     onDoorEvent: jest.fn(),
+    getCurrentDoorState: jest.fn().mockReturnValue(1),
   };
 
   const mockNlpService = {
@@ -159,7 +160,7 @@ describe('AppController', () => {
 
       const intent = Intent.QueryState;
       const score = 1;
-      const answer = 'It is open';
+      const answer = 'The door is closed.';
 
       const event = {
         message: {
@@ -169,7 +170,7 @@ describe('AppController', () => {
         },
       };
 
-      mockNlpService.process.mockResolvedValue({ intent, score, answer });
+      mockNlpService.process.mockResolvedValue({ intent, score });
 
       await appController.messageHandler(event);
 
@@ -182,8 +183,6 @@ describe('AppController', () => {
         thread: ts,
         text: answer,
       });
-
-      // @TODO add test for GPIO
     });
   });
 
