@@ -42,7 +42,7 @@ export class AppController {
       message.text,
     );
     let text = answer;
-    if (!text || score < 0.75) {
+    if (intent !== Intent.QueryState && (!text || score < 0.75)) {
       text = "I'm not sure what you're saying. Can you try again?";
     } else {
       switch (intent) {
@@ -55,7 +55,8 @@ export class AppController {
           // @TODO close the door
           break;
         case Intent.QueryState:
-          // @TODO get the current state
+          const currentState = this.gpioService.getCurrentDoorState();
+          text = `The door is ${currentState ? 'closed' : 'open'}.`;
           break;
         default:
           text =
@@ -73,7 +74,7 @@ export class AppController {
   doorEventHandler = async (newState: number): Promise<void> => {
     await this.slackService.sendText({
       users: this.messageRecipients,
-      text: `The garage door is ${newState === 0 ? 'closing' : 'opening'}.`,
+      text: newState === 0 ? 'Closing' : 'Opening',
     });
   };
 }

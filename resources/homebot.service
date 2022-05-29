@@ -1,0 +1,13 @@
+[Unit]
+Description=Homebot - The garage door monitoring service
+After=network.target
+
+[Service]
+Type=simple
+User=dave
+WorkingDirectory=/home/dave/homebot
+ExecStart=/usr/bin/node /home/dave/homebot/main.js
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
