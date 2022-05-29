@@ -45,7 +45,7 @@ fi
 
 # stop the service
 echo "[deployment] stop service"
-systemctl stop homebot
+sudo systemctl stop homebot
 sleep 10s
 
 echo "[deployment] replace service"
@@ -55,7 +55,7 @@ fi
 mv "/home/dave/$STAGING_DIR" "/home/dave/$APP_DIR"
 
 echo "[deployment] start service"
-systemctl start homebot
+sudo systemctl start homebot
 
 echo "[deployment] final clean up"
 rm -rf "$TEMP_DIR" "$WORK_DIR" "$STAGING_DIR"
