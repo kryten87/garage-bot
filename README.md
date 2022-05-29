@@ -33,11 +33,12 @@ The brains of the bot. Processes input from Slack and outputs the resulting acti
 ✅ 0.6.0 - manual deployment
 ✅ 0.6.1 - correct pull down on switch config
 0.6.2 - correct door open/closed query
-0.7.0 - logging (to slack?)
-0.8.0 - add garage door open/close functionality
-0.9.0 - end-to-end tests
-0.10.0 - deployment (automated?)
+0.7.0 - add help text
+0.8.0 - logging (to slack?)
 1.0.0 - initial release
+1.1.0 - add garage door open/close functionality
+1.2.0 - end-to-end tests
+1.3.0 - deployment (automated?)
 
 #### Notes
 
