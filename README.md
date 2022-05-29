@@ -31,9 +31,10 @@ The brains of the bot. Processes input from Slack and outputs the resulting acti
 ✅ 0.4.0 - controller tests
 ✅ 0.5.0 - initial setup of RPi GPIO - sense door open/closed
 0.6.0 - manual deployment
-0.7.0 - add garage door open/close functionality
-0.8.0 - end-to-end tests
-0.9.0 - deployment (automated?)
+0.7.0 - logging (to slack?)
+0.8.0 - add garage door open/close functionality
+0.9.0 - end-to-end tests
+0.10.0 - deployment (automated?)
 1.0.0 - initial release
 
 #### Notes
@@ -52,6 +53,7 @@ Consider [ngrok](https://ngrok.com/) or [localtunnel](https://www.npmjs.com/pack
 
 ### Future
 
+- get version # from package.json
 - history -- report when garage door opened/closed last
 - camera -- get a snapshot with the query results
 
