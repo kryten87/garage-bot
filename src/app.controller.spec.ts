@@ -1,11 +1,23 @@
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { ConfigService } from '@nestjs/config';
+import { GpioService } from './rpi/services/gpio';
 import { NlpService, Intent } from './nlp/services/nlp';
 import { SlackService } from './slack/services/slack';
 import { Test, TestingModule } from '@nestjs/testing';
 
 describe('AppController', () => {
   let appController: AppController;
+
+  const messageRecipients = 'Alpha,Bravo,Charlie';
+
+  const mockConfigService = {
+    get: jest.fn().mockReturnValue(messageRecipients),
+  };
+
+  const mockGpioService = {
+    onDoorEvent: jest.fn(),
+  };
 
   const mockNlpService = {
     process: jest.fn(),
@@ -17,13 +29,17 @@ describe('AppController', () => {
   };
 
   beforeEach(async () => {
+    mockGpioService.onDoorEvent.mockClear();
     mockNlpService.process.mockClear();
+    mockSlackService.onMessage.mockClear();
     mockSlackService.sendText.mockClear();
 
     const app: TestingModule = await Test.createTestingModule({
       controllers: [AppController],
       providers: [
         AppService,
+        { provide: ConfigService, useValue: mockConfigService },
+        { provide: GpioService, useValue: mockGpioService },
         { provide: NlpService, useValue: mockNlpService },
         { provide: SlackService, useValue: mockSlackService },
       ],
@@ -33,7 +49,14 @@ describe('AppController', () => {
   });
 
   describe('messageHandler', () => {
-    it('should correctly handle a Greeting message', async () => {
+    it('should initialize the handler on instantiation', async () => {
+      expect(mockSlackService.onMessage.mock.calls.length).toBe(1);
+      expect(mockSlackService.onMessage.mock.calls[0][1]).toEqual(
+        appController.messageHandler,
+      );
+    });
+
+    it('should correctly respond to a Greeting message', async () => {
       const channel = 'A123456';
       const ts = '123456.654321';
 
@@ -64,7 +87,7 @@ describe('AppController', () => {
       });
     });
 
-    it('should correctly handle an OpenDoor message', async () => {
+    it('should correctly respond to an OpenDoor message', async () => {
       const channel = 'A123456';
       const ts = '123456.654321';
 
@@ -97,7 +120,7 @@ describe('AppController', () => {
       // @TODO add test for GPIO
     });
 
-    it('should correctly handle a CloseDoor message', async () => {
+    it('should correctly respond to a CloseDoor message', async () => {
       const channel = 'A123456';
       const ts = '123456.654321';
 
@@ -130,7 +153,7 @@ describe('AppController', () => {
       // @TODO add test for GPIO
     });
 
-    it('should correctly handle a QueryState message', async () => {
+    it('should correctly respond to a QueryState message', async () => {
       const channel = 'A123456';
       const ts = '123456.654321';
 
@@ -161,6 +184,29 @@ describe('AppController', () => {
       });
 
       // @TODO add test for GPIO
+    });
+  });
+
+  describe('doorSensorHandler', () => {
+    it('should initialize the handler on startup', async () => {
+      expect(mockGpioService.onDoorEvent.mock.calls.length).toBe(1);
+      expect(mockGpioService.onDoorEvent.mock.calls[0][0]).toEqual(
+        appController.doorEventHandler,
+      );
+    });
+
+    it('should correctly send a message on door state change', async () => {
+      await appController.doorEventHandler(1);
+      await appController.doorEventHandler(0);
+      expect(mockSlackService.sendText.mock.calls.length).toBe(2);
+      expect(mockSlackService.sendText.mock.calls[0][0]).toEqual({
+        users: messageRecipients.split(','),
+        text: 'The garage door is opening.',
+      });
+      expect(mockSlackService.sendText.mock.calls[1][0]).toEqual({
+        users: messageRecipients.split(','),
+        text: 'The garage door is closing.',
+      });
     });
   });
 });
