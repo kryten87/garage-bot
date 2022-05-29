@@ -73,7 +73,7 @@ export class AppController {
   doorEventHandler = async (newState: number): Promise<void> => {
     await this.slackService.sendText({
       users: this.messageRecipients,
-      text: `The garage door is ${newState === 0 ? 'closing' : 'opening'}.`,
+      text: newState === 0 ? 'Closing' : 'Opening',
     });
   };
 }
