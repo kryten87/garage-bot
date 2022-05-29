@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# You need to adjust the sudo permissions for the user to allow
+# systemctl start|stop|restart homebot
+# without a password
+
 APP_DIR=homebot
 WORK_DIR=homebot-work
 STAGING_DIR=homebot-staging
