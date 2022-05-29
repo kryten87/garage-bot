@@ -56,7 +56,7 @@ export class AppController {
           break;
         case Intent.QueryState:
           const currentState = this.gpioService.getCurrentDoorState();
-          text = `The door is ${currentState ? 'closed' : 'open'}.`;
+          text = `The door is ${currentState ? 'open' : 'closed'}.`;
           break;
         default:
           text =
@@ -74,7 +74,7 @@ export class AppController {
   doorEventHandler = async (newState: number): Promise<void> => {
     await this.slackService.sendText({
       users: this.messageRecipients,
-      text: newState === 0 ? 'Closing' : 'Opening',
+      text: newState === 0 ? 'Closed' : 'Opened',
     });
   };
 }
