@@ -18,6 +18,7 @@ describe('Gpio', () => {
   };
 
   const mockRpio = {
+    init: jest.fn(),
     open: jest.fn(),
     read: jest.fn(),
   };
@@ -34,6 +35,7 @@ describe('Gpio', () => {
     provider = module.get<GpioService>(GpioService);
 
     mockRpio.open.mockClear();
+    mockRpio.init.mockClear();
     mockRpio.read.mockClear();
   });
 
