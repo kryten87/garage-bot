@@ -38,7 +38,7 @@ export class GpioService implements OnModuleInit, OnModuleDestroy {
 
   async onModuleInit() {
     // set the door switch for input
-    this.rpio.open(this.doorSensorPin, this.rpio.INPUT);
+    this.rpio.open(this.doorSensorPin, this.rpio.INPUT, this.rpio.PULL_UP);
     // @TODO set up pins for output here
   }
 
