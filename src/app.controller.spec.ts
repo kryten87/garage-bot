@@ -17,7 +17,7 @@ describe('AppController', () => {
 
   const mockGpioService = {
     onDoorEvent: jest.fn(),
-    getCurrentDoorState: jest.fn().mockReturnValue(1),
+    getCurrentDoorState: jest.fn().mockReturnValue(0),
   };
 
   const mockNlpService = {

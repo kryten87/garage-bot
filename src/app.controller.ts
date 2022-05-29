@@ -56,7 +56,7 @@ export class AppController {
           break;
         case Intent.QueryState:
           const currentState = this.gpioService.getCurrentDoorState();
-          text = `The door is ${currentState ? 'closed' : 'open'}.`;
+          text = `The door is ${currentState ? 'open' : 'closed'}.`;
           break;
         default:
           text =
