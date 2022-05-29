@@ -200,11 +200,11 @@ describe('AppController', () => {
       expect(mockSlackService.sendText.mock.calls.length).toBe(2);
       expect(mockSlackService.sendText.mock.calls[0][0]).toEqual({
         users: messageRecipients.split(','),
-        text: 'Opening',
+        text: 'Opened',
       });
       expect(mockSlackService.sendText.mock.calls[1][0]).toEqual({
         users: messageRecipients.split(','),
-        text: 'Closing',
+        text: 'Closed',
       });
     });
   });
