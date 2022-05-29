@@ -22,7 +22,9 @@ export class GpioService implements OnModuleInit, OnModuleDestroy {
     this.rpio.init();
 
     // initialize the service state
-    this.pollingInterval = +this.configService.get<number>('SENSOR_POLLING_INTERVAL');
+    this.pollingInterval = +this.configService.get<number>(
+      'SENSOR_POLLING_INTERVAL',
+    );
     this.doorSensorPin = this.configService.get<number>('GPIO_DOOR_SENSOR');
     this.currentState[this.doorSensorPin] = 0;
     this.inputState[this.doorSensorPin] = [0, 0, 0];
