@@ -32,7 +32,8 @@ The brains of the bot. Processes input from Slack and outputs the resulting acti
 ✅ 0.5.0 - initial setup of RPi GPIO - sense door open/closed
 ✅ 0.6.0 - manual deployment
 ✅ 0.6.1 - correct pull down on switch config
-0.6.2 - correct door open/closed query
+✅ 0.6.2 - correct messages
+✅ 0.6.3 - correct door open/closed query
 0.7.0 - add help text
 0.8.0 - logging (to slack?)
 1.0.0 - initial release
