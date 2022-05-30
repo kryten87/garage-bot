@@ -44,6 +44,9 @@ export class SlackService implements OnModuleInit {
   /** Set up a listener for messages */
   async onMessage(pattern: string | RegExp, handler: any) {
     this.boltApp.message(pattern, handler);
+    this.boltApp.event('app_mention', async ({ event }) =>
+      handler({ message: event }),
+    );
   }
 
   /** Send a message */

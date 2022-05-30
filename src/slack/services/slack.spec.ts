@@ -12,6 +12,7 @@ describe('Slack', () => {
   const mockBoltApp = {
     start: jest.fn().mockResolvedValue(undefined),
     message: jest.fn(),
+    event: jest.fn(),
     client: {
       users: {
         // bot -- users:read
@@ -44,6 +45,7 @@ describe('Slack', () => {
 
     mockBoltApp.start.mockClear();
     mockBoltApp.message.mockClear();
+    mockBoltApp.event.mockClear();
     mockBoltApp.client.users.list.mockClear();
     mockBoltApp.client.conversations.open.mockClear();
     mockBoltApp.client.chat.postMessage.mockClear();
@@ -70,6 +72,13 @@ describe('Slack', () => {
       expect(mockBoltApp.message.mock.calls[0][0]).toBe(pattern);
       expect(mockBoltApp.message.mock.calls[0][1]).toEqual(handler);
       expect(handler.mock.calls.length).toBe(0);
+    });
+
+    it('should set up the app_mention handler', () => {
+      const pattern = 'hello';
+      const handler = jest.fn();
+      provider.onMessage(pattern, handler);
+      expect(mockBoltApp.event.mock.calls.length).toBe(1);
     });
   });
 
