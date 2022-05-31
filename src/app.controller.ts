@@ -37,7 +37,7 @@ export class AppController {
   }
 
   messageHandler = async ({ message }): Promise<void> => {
-    const { channel, ts } = message;
+    const { channel } = message;
     const { intent, score, answer } = await this.nlpService.process(
       message.text,
     );
@@ -66,7 +66,6 @@ export class AppController {
     }
     await this.slackService.sendText({
       channel,
-      thread: ts,
       text,
     });
   };
