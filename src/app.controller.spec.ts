@@ -59,7 +59,6 @@ describe('AppController', () => {
 
     it('should correctly respond to a Greeting message', async () => {
       const channel = 'A123456';
-      const ts = '123456.654321';
 
       const intent = Intent.Greeting;
       const score = 1;
@@ -68,7 +67,6 @@ describe('AppController', () => {
       const event = {
         message: {
           channel,
-          ts,
           text: 'Hello!',
         },
       };
@@ -83,14 +81,12 @@ describe('AppController', () => {
       expect(mockSlackService.sendText.mock.calls.length).toBe(1);
       expect(mockSlackService.sendText.mock.calls[0][0]).toEqual({
         channel,
-        thread: ts,
         text: answer,
       });
     });
 
     it('should correctly respond to an OpenDoor message', async () => {
       const channel = 'A123456';
-      const ts = '123456.654321';
 
       const intent = Intent.OpenDoor;
       const score = 1;
@@ -99,7 +95,6 @@ describe('AppController', () => {
       const event = {
         message: {
           channel,
-          ts,
           text: 'open the pod bay doors, Hal',
         },
       };
@@ -114,7 +109,6 @@ describe('AppController', () => {
       expect(mockSlackService.sendText.mock.calls.length).toBe(1);
       expect(mockSlackService.sendText.mock.calls[0][0]).toEqual({
         channel,
-        thread: ts,
         text: answer,
       });
 
@@ -123,7 +117,6 @@ describe('AppController', () => {
 
     it('should correctly respond to a CloseDoor message', async () => {
       const channel = 'A123456';
-      const ts = '123456.654321';
 
       const intent = Intent.CloseDoor;
       const score = 1;
@@ -132,7 +125,6 @@ describe('AppController', () => {
       const event = {
         message: {
           channel,
-          ts,
           text: 'close the damn door',
         },
       };
@@ -147,7 +139,6 @@ describe('AppController', () => {
       expect(mockSlackService.sendText.mock.calls.length).toBe(1);
       expect(mockSlackService.sendText.mock.calls[0][0]).toEqual({
         channel,
-        thread: ts,
         text: answer,
       });
 
@@ -156,7 +147,6 @@ describe('AppController', () => {
 
     it('should correctly respond to a QueryState message', async () => {
       const channel = 'A123456';
-      const ts = '123456.654321';
 
       const intent = Intent.QueryState;
       const score = 1;
@@ -165,7 +155,6 @@ describe('AppController', () => {
       const event = {
         message: {
           channel,
-          ts,
           text: 'is the door open?',
         },
       };
@@ -180,7 +169,6 @@ describe('AppController', () => {
       expect(mockSlackService.sendText.mock.calls.length).toBe(1);
       expect(mockSlackService.sendText.mock.calls[0][0]).toEqual({
         channel,
-        thread: ts,
         text: answer,
       });
     });
