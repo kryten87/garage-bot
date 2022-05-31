@@ -34,6 +34,7 @@ The brains of the bot. Processes input from Slack and outputs the resulting acti
 ✅ 0.6.1 - correct pull down on switch config
 ✅ 0.6.2 - correct messages
 ✅ 0.6.3 - correct door open/closed query
+0.6.4 - garage door query - do not reply in thread
 0.7.0 - logging (to slack?)
 1.0.0 - initial release
 1.1.0 - add garage door open/close functionality
