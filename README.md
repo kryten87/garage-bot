@@ -34,14 +34,50 @@ The brains of the bot. Processes input from Slack and outputs the resulting acti
 ✅ 0.6.1 - correct pull down on switch config
 ✅ 0.6.2 - correct messages
 ✅ 0.6.3 - correct door open/closed query
-0.7.0 - add help text
-0.8.0 - logging (to slack?)
+✅ 0.7.0 - logging (to slack?)
+0.8.0 - add help text
 1.0.0 - initial release
+1.1.0 - Python PiFace Digital 2? To interface with relays & IO
 1.1.0 - add garage door open/close functionality
 1.2.0 - end-to-end tests
 1.3.0 - deployment (automated?)
 
 #### Notes
+
+**PiFace Digital 2**
+
+The PiFace is old and not particularly up to date. There is a NodeJS package, but it's obsolete. The [Python package](https://github.com/piface/pifacedigitalio) might still work. In that case, I need a way for the Python package to handle the IO, and communicate with the NodeJS application.
+
+- HTTP/Socket -- doable, but seems complicated
+- [Named Pipes](https://levelup.gitconnected.com/inter-process-communication-between-node-js-and-python-2e9c4fda928d)
+
+*PiFace Digital 2 works with Pi A+!*
+
+[Documentation](https://pifacedigitalio.readthedocs.io/pifacedigital.html)
+
+Plan: need new Python service that
+- listens for changes on GPIO input
+- listens for input from NodeJS app on named pipe to
+  - trigger relay to open/close
+  - trigger relay to turn on/off light for camera
+
+Pseudocode:
+
+decide on data structures
+  - GPIO input: `{ sensor: true }`
+  - Triggering relay: `{ light: true, door: true }`
+  - both input/output use the same data structure
+
+1. create named pipes for input/output
+  - want to check first, then create (*add this to NodeJS app as well*)
+2. set up interrupt listener for button input
+  - on change, forward to NodeJS app
+3. add code to trigger relays based on input
+  - on incoming request, set relay to new state
+
+TODO
+1. rewrite NodeJS gpio service to use this model
+2. write Python service
 
 **Deployment**
 
@@ -60,6 +96,7 @@ Consider [ngrok](https://ngrok.com/) or [localtunnel](https://www.npmjs.com/pack
 - get version # from package.json
 - history -- report when garage door opened/closed last
 - camera -- get a snapshot with the query results
+- add tests for slack logging
 
 ## Installation
 

@@ -1,12 +1,13 @@
 import { AppService } from './app.service';
 import { ConfigService } from '@nestjs/config';
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Logger } from '@nestjs/common';
 import { GpioService } from './rpi/services/gpio';
 import { NlpService, Intent } from './nlp/services/nlp';
 import { SlackService } from './slack/services/slack';
 
 @Controller()
 export class AppController {
+  private readonly logger = new Logger('app.controller');
   private messageRecipients: string[];
 
   constructor(
@@ -44,6 +45,7 @@ export class AppController {
     let text = answer;
     if (intent !== Intent.QueryState && (!text || score < 0.75)) {
       text = "I'm not sure what you're saying. Can you try again?";
+      this.logger.log(`unrecognized phrase: "${message.text}"`);
     } else {
       switch (intent) {
         case Intent.Greeting:
@@ -61,6 +63,7 @@ export class AppController {
         default:
           text =
             "I'm afraid I didn't understand that. Can you repeat that please?";
+          this.logger.log(`unrecognized phrase: "${message.text}"`);
           break;
       }
     }
