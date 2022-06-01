@@ -19,6 +19,7 @@ interface SendTextOptions {
 @Injectable()
 export class SlackService implements OnModuleInit {
   private userCache: UserCache = {};
+  private channelCache: UserCache = {};
 
   constructor(
     private readonly configService: ConfigService,
@@ -115,5 +116,31 @@ export class SlackService implements OnModuleInit {
         : null;
     }
     throw new Error(`no user found with display name "${name}"`);
+  }
+
+  async getChannelId(channel: string): Promise<string> {
+    const channelName = `${channel}`.replace(/^#/, '');
+    if (this.channelCache[channelName]) {
+      return this.channelCache[channelName];
+    }
+    const channelList = await this.boltApp.client.conversations.list({
+      limit: 50,
+    });
+    let { channels } = channelList;
+    while (channels && channels.length > 0) {
+      channels.forEach((item) => {
+        this.channelCache[item.name] = item.id;
+      });
+      const id = this.channelCache[channelName];
+      if (id) {
+        return id;
+      }
+      const cursor = channelList.response_metadata?.next_cursor;
+      const list = cursor
+        ? await this.boltApp.client.conversations.list({ limit: 50, cursor })
+        : null;
+      channels = list?.channels;
+    }
+    throw new Error(`no channel found with name "${channelName}"`);
   }
 }
