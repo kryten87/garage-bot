@@ -34,14 +34,23 @@ The brains of the bot. Processes input from Slack and outputs the resulting acti
 ✅ 0.6.1 - correct pull down on switch config
 ✅ 0.6.2 - correct messages
 ✅ 0.6.3 - correct door open/closed query
-0.6.4 - garage door query - do not reply in thread
-0.7.0 - logging (to slack?)
+0.7.0 - add help text
+0.8.0 - logging (to slack?)
 1.0.0 - initial release
+1.1.0 - Python PiFace Digital 2? To interface with relays & IO
 1.1.0 - add garage door open/close functionality
 1.2.0 - end-to-end tests
 1.3.0 - deployment (automated?)
 
 #### Notes
+
+**PiFace Digital 2**
+
+The PiFace is old and not particularly up to date. There is a NodeJS package, but it's obsolete. The [Python package](https://github.com/piface/pifacedigitalio) might still work. In that case, I need a way for the Python package to handle the IO, and communicate with the NodeJS application.
+
+- HTTP/Socket -- doable, but seems complicated
+- [Named Pipes](https://levelup.gitconnected.com/inter-process-communication-between-node-js-and-python-2e9c4fda928d)
+
 
 **Deployment**
 
@@ -57,7 +66,6 @@ Consider [ngrok](https://ngrok.com/) or [localtunnel](https://www.npmjs.com/pack
 
 ### Future
 
-- help text
 - get version # from package.json
 - history -- report when garage door opened/closed last
 - camera -- get a snapshot with the query results
