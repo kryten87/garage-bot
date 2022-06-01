@@ -9,30 +9,33 @@ describe('Slack', () => {
     get: jest.fn(),
   };
 
-  const mockBoltApp = {
-    start: jest.fn().mockResolvedValue(undefined),
-    message: jest.fn(),
-    event: jest.fn(),
-    client: {
-      users: {
-        // bot -- users:read
-        // user -- users:read
-        list: jest.fn(),
-      },
-      conversations: {
-        // bot -- channels:manage, groups:write, im:write, mpim:write
-        // user -- channels:write, groups:write, im:write, mpim:write
-        open: jest.fn(),
-      },
-      chat: {
-        // bot -- chat:write
-        // user -- chat:write, chat:write:user, chat:write:bot
-        postMessage: jest.fn(),
-      },
-    },
-  };
+  let mockBoltApp;
 
   beforeEach(async () => {
+    mockBoltApp = {
+      start: jest.fn().mockResolvedValue(undefined),
+      message: jest.fn(),
+      event: jest.fn(),
+      client: {
+        users: {
+          // bot -- users:read
+          // user -- users:read
+          list: jest.fn(),
+        },
+        conversations: {
+          // bot -- channels:manage, groups:write, im:write, mpim:write
+          // user -- channels:write, groups:write, im:write, mpim:write
+          open: jest.fn(),
+          list: jest.fn(),
+        },
+        chat: {
+          // bot -- chat:write
+          // user -- chat:write, chat:write:user, chat:write:bot
+          postMessage: jest.fn(),
+        },
+      },
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         SlackService,
@@ -42,13 +45,6 @@ describe('Slack', () => {
     }).compile();
 
     provider = module.get<SlackService>(SlackService);
-
-    mockBoltApp.start.mockClear();
-    mockBoltApp.message.mockClear();
-    mockBoltApp.event.mockClear();
-    mockBoltApp.client.users.list.mockClear();
-    mockBoltApp.client.conversations.open.mockClear();
-    mockBoltApp.client.chat.postMessage.mockClear();
   });
 
   it('should be defined', () => {
@@ -380,6 +376,289 @@ describe('Slack', () => {
 
       const result = await provider.getUserId('@Thor');
       expect(result).toBe('W012A3FFF');
+    });
+  });
+
+  describe('getChannelID', () => {
+    const baseChannel = {
+      is_channel: true,
+      is_group: false,
+      is_im: false,
+      is_mpim: false,
+      is_private: false,
+      is_archived: false,
+      is_general: false,
+      unlinked: 0,
+      is_shared: false,
+      is_org_shared: false,
+      is_pending_ext_shared: false,
+      pending_shared: [],
+      parent_conversation: null,
+      creator: 'U02H6SP8HNJ',
+      is_ext_shared: false,
+      shared_team_ids: [Array],
+      pending_connected_team_ids: [],
+      is_member: false,
+      topic: [Object],
+      purpose: [Object],
+      previous_names: [],
+    };
+    it('should call the conversations.list method to get channels', async () => {
+      const channels = [
+        {
+          ...baseChannel,
+          id: 'C02HS7CA6NM',
+          name: 'home',
+          created: 1633979966,
+          name_normalized: 'home',
+          num_members: 2,
+        },
+        {
+          ...baseChannel,
+          id: 'C03HPS7QH1U',
+          name: 'garagebot-logs',
+          created: 1654109298,
+          name_normalized: 'garagebot-logs',
+          num_members: 1,
+        },
+      ];
+      mockBoltApp.client.conversations.list.mockResolvedValueOnce({
+        ok: true,
+        channels,
+      });
+      await provider.getChannelId('home');
+      expect(mockBoltApp.client.conversations.list.mock.calls.length).toBe(1);
+    });
+
+    it('should return the expected value (1st page of results)', async () => {
+      const channels = [
+        [
+          {
+            ...baseChannel,
+            id: 'C02HS7CA6NM',
+            name: 'home',
+            created: 1633979966,
+            name_normalized: 'home',
+            num_members: 2,
+          },
+          {
+            ...baseChannel,
+            id: 'C03HPS7QH1U',
+            name: 'garagebot-logs',
+            created: 1654109298,
+            name_normalized: 'garagebot-logs',
+            num_members: 1,
+          },
+        ],
+        [
+          {
+            ...baseChannel,
+            id: 'C02HS7CA6NX',
+            name: 'home-2',
+            created: 1633979966,
+            name_normalized: 'home',
+            num_members: 2,
+          },
+          {
+            ...baseChannel,
+            id: 'C03HPS7QH1Y',
+            name: 'garagebot-logs-2',
+            created: 1654109298,
+            name_normalized: 'garagebot-logs',
+            num_members: 1,
+          },
+        ],
+      ];
+      mockBoltApp.client.conversations.list.mockResolvedValueOnce({
+        ok: true,
+        channels: channels[0],
+        response_metadata: {
+          next_cursor: 'alpha',
+        },
+      });
+      mockBoltApp.client.conversations.list.mockResolvedValueOnce({
+        ok: true,
+        channels: channels[1],
+      });
+      const result = await provider.getChannelId('garagebot-logs');
+      expect(result).toBe(channels[0][1].id);
+    });
+
+    it('should return the expected value (2nd page of results)', async () => {
+      const channels = [
+        [
+          {
+            ...baseChannel,
+            id: 'C02HS7CA6NM',
+            name: 'home',
+            created: 1633979966,
+            name_normalized: 'home',
+            num_members: 2,
+          },
+          {
+            ...baseChannel,
+            id: 'C03HPS7QH1U',
+            name: 'garagebot-logs',
+            created: 1654109298,
+            name_normalized: 'garagebot-logs',
+            num_members: 1,
+          },
+        ],
+        [
+          {
+            ...baseChannel,
+            id: 'C02HS7CA6NX',
+            name: 'home-2',
+            created: 1633979966,
+            name_normalized: 'home',
+            num_members: 2,
+          },
+          {
+            ...baseChannel,
+            id: 'C03HPS7QH1Y',
+            name: 'garagebot-logs-2',
+            created: 1654109298,
+            name_normalized: 'garagebot-logs',
+            num_members: 1,
+          },
+        ],
+      ];
+      mockBoltApp.client.conversations.list.mockResolvedValueOnce({
+        ok: true,
+        channels: channels[0],
+        response_metadata: {
+          next_cursor: 'bravo',
+        },
+      });
+      mockBoltApp.client.conversations.list.mockResolvedValueOnce({
+        ok: true,
+        channels: channels[1],
+      });
+      const result = await provider.getChannelId('home-2');
+      expect(result).toBe(channels[1][0].id);
+    });
+
+    it('should throw an error if the channel name is not found', async () => {
+      const channels = [
+        {
+          ...baseChannel,
+          id: 'C02HS7CA6NM',
+          name: 'home',
+          created: 1633979966,
+          name_normalized: 'home',
+          num_members: 2,
+        },
+        {
+          ...baseChannel,
+          id: 'C03HPS7QH1U',
+          name: 'garagebot-logs',
+          created: 1654109298,
+          name_normalized: 'garagebot-logs',
+          num_members: 1,
+        },
+      ];
+      mockBoltApp.client.conversations.list.mockResolvedValueOnce({
+        ok: true,
+        channels,
+        response_metadata: {},
+      });
+      try {
+        await provider.getChannelId('not-a-channel');
+        throw new Error('this should not happen');
+      } catch (err) {
+        expect(err.message).toContain('no channel found');
+      }
+    });
+
+    it('should update the local cache with found channel IDs', async () => {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore checking private property; ok for testing
+      expect(provider.channelCache).toEqual({});
+      const channels = [
+        [
+          {
+            ...baseChannel,
+            id: 'C02HS7CA6NM',
+            name: 'home',
+            created: 1633979966,
+            name_normalized: 'home',
+            num_members: 2,
+          },
+          {
+            ...baseChannel,
+            id: 'C03HPS7QH1U',
+            name: 'garagebot-logs',
+            created: 1654109298,
+            name_normalized: 'garagebot-logs',
+            num_members: 1,
+          },
+        ],
+        [
+          {
+            ...baseChannel,
+            id: 'C02HS7CA6NX',
+            name: 'home-2',
+            created: 1633979966,
+            name_normalized: 'home',
+            num_members: 2,
+          },
+          {
+            ...baseChannel,
+            id: 'C03HPS7QH1Y',
+            name: 'garagebot-logs-2',
+            created: 1654109298,
+            name_normalized: 'garagebot-logs',
+            num_members: 1,
+          },
+        ],
+      ];
+      mockBoltApp.client.conversations.list.mockResolvedValueOnce({
+        ok: true,
+        channels: channels[0],
+        response_metadata: {
+          next_cursor: 'charlie',
+        },
+      });
+      mockBoltApp.client.conversations.list.mockResolvedValueOnce({
+        ok: true,
+        channels: channels[1],
+      });
+      await provider.getChannelId('home-2');
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore checking private property; ok for testing
+      expect(provider.channelCache).toEqual({
+        'garagebot-logs': 'C03HPS7QH1U',
+        'garagebot-logs-2': 'C03HPS7QH1Y',
+        home: 'C02HS7CA6NM',
+        'home-2': 'C02HS7CA6NX',
+      });
+    });
+
+    it('should use the cached value if available', async () => {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore checking private property; ok for testing
+      provider.channelCache = {
+        'garagebot-logs': 'C03HPS7QH1U',
+        'garagebot-logs-2': 'C03HPS7QH1Y',
+        home: 'C02HS7CA6NM',
+        'home-2': 'C02HS7CA6NX',
+      };
+      const result = await provider.getChannelId('home-2');
+      expect(result).toBe('C02HS7CA6NX');
+      expect(mockBoltApp.client.conversations.list.mock.calls.length).toBe(0);
+    });
+
+    it('should return the expected value for #channel-name', async () => {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore checking private property; ok for testing
+      provider.channelCache = {
+        'garagebot-logs': 'C03HPS7QH1U',
+        'garagebot-logs-2': 'C03HPS7QH1Y',
+        home: 'C02HS7CA6NM',
+        'home-2': 'C02HS7CA6NX',
+      };
+      const result = await provider.getChannelId('#home-2');
+      expect(result).toBe('C02HS7CA6NX');
     });
   });
 });
