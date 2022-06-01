@@ -53,6 +53,8 @@ The PiFace is old and not particularly up to date. There is a NodeJS package, bu
 
 *PiFace Digital 2 works with Pi A+!*
 
+[Documentation](https://pifacedigitalio.readthedocs.io/pifacedigital.html)
+
 Plan: need new Python service that
 - listens for changes on GPIO input
 - listens for input from NodeJS app on named pipe to
