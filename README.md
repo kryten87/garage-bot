@@ -96,6 +96,7 @@ Consider [ngrok](https://ngrok.com/) or [localtunnel](https://www.npmjs.com/pack
 - get version # from package.json
 - history -- report when garage door opened/closed last
 - camera -- get a snapshot with the query results
+- add tests for slack logging
 
 ## Installation
 
