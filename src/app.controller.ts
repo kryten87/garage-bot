@@ -52,28 +52,28 @@ export class AppController {
         text =
           score > 0.8
             ? text
-            : "I'm not sure what you mean. Are you just saying hi?";
+            : "I'm not sure what you mean. Are you just saying hi? Try asking for help if you need more info.";
         break;
       case Intent.OpenDoor:
         // @TODO open the door
         text =
           score > 0.8
             ? text
-            : `I'm not sure what you mean. Are you asking me to open the door?`;
+            : `I'm not sure what you mean. Are you asking me to open the door? Try asking for help if you need more info.`;
         break;
       case Intent.CloseDoor:
         // @TODO close the door
         text =
           score > 0.8
             ? text
-            : "I'm not sure what you mean. Are you asking me to close the door?";
+            : "I'm not sure what you mean. Are you asking me to close the door? Try asking for help if you need more info.";
         break;
       case Intent.QueryState:
         const currentState = this.gpioService.getCurrentDoorState();
         text =
           score > 0.8
             ? `The door is ${currentState ? 'open' : 'closed'}.`
-            : `I'm not sure what you mean. Are you asking if the garage door is open?`;
+            : `I'm not sure what you mean. Are you asking if the garage door is open? Try asking for help if you need more info.`;
         break;
       case Intent.Help:
         text = [
@@ -86,7 +86,7 @@ export class AppController {
           .join(' ');
         break;
       default:
-        text = `I'm afraid I didn't understand that. Can you repeat that please?`;
+        text = `I'm afraid I didn't understand that. Can you repeat that please? Try asking for help if you need more info.`;
         break;
     }
     await this.slackService.sendText({ channel, text });
