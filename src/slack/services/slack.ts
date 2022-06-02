@@ -75,7 +75,9 @@ export class SlackService implements OnModuleInit {
       .filter(Boolean)
       .join(',');
 
-    let channelId = channel;
+    let channelId = /^#/.test(channel)
+      ? await this.getChannelId(channel)
+      : channel;
     if (users) {
       const response = await this.boltApp.client.conversations.open({ users });
       channelId = response?.channel?.id;
