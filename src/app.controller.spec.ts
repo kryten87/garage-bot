@@ -9,11 +9,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 describe('AppController', () => {
   let appController: AppController;
 
+  const loggingChannel = 'garagebot-logs';
   const messageRecipients = 'Alpha,Bravo,Charlie';
-
-  const mockConfigService = {
-    get: jest.fn().mockReturnValue(messageRecipients),
-  };
 
   const mockGpioService = {
     onDoorEvent: jest.fn(),
@@ -30,6 +27,13 @@ describe('AppController', () => {
   };
 
   beforeEach(async () => {
+    const mockConfigService = {
+      get: jest
+        .fn()
+        .mockReturnValueOnce(loggingChannel)
+        .mockReturnValueOnce(messageRecipients),
+    };
+
     mockGpioService.onDoorEvent.mockClear();
     mockNlpService.process.mockClear();
     mockSlackService.onMessage.mockClear();
@@ -171,6 +175,46 @@ describe('AppController', () => {
         channel,
         text: answer,
       });
+    });
+
+    it('should correctly handle a low-confidence message', async () => {
+      const messageChannel = 'A123456';
+      const intent = Intent.QueryState;
+      const score = 0.1;
+
+      const event = {
+        message: {
+          channel: messageChannel,
+          text: 'is the door open?',
+        },
+      };
+
+      mockNlpService.process.mockResolvedValue({ intent, score });
+
+      await appController.messageHandler(event);
+
+      expect(mockSlackService.sendText.mock.calls.length).toBe(2);
+
+      expect(mockSlackService.sendText.mock.calls[0][0].channel).toBe(
+        messageChannel,
+      );
+      expect(mockSlackService.sendText.mock.calls[0][0].text).toContain(
+        'not sure',
+      );
+      expect(mockSlackService.sendText.mock.calls[0][0].text).toContain(
+        'garage door is open',
+      );
+
+      expect(mockSlackService.sendText.mock.calls[1][0].channel).toBe(
+        loggingChannel,
+      );
+      expect(mockSlackService.sendText.mock.calls[1][0].text).toBe(
+        JSON.stringify({
+          message: event.message,
+          intent,
+          score,
+        }),
+      );
     });
   });
 

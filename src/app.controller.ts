@@ -1,13 +1,13 @@
 import { AppService } from './app.service';
 import { ConfigService } from '@nestjs/config';
-import { Controller, Get, Logger } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { GpioService } from './rpi/services/gpio';
 import { NlpService, Intent } from './nlp/services/nlp';
 import { SlackService } from './slack/services/slack';
 
 @Controller()
 export class AppController {
-  private readonly logger = new Logger('app.controller');
+  private slackLoggingChannel: string;
   private messageRecipients: string[];
 
   constructor(
@@ -17,6 +17,9 @@ export class AppController {
     private readonly nlpService: NlpService,
     private readonly slackService: SlackService,
   ) {
+    this.slackLoggingChannel = this.configService.get<string>(
+      'SLACK_LOGGING_CHANNEL',
+    );
     this.messageRecipients = this.configService
       .get<string>('SLACK_DOOR_EVENT_RECIPIENTS')
       .split(',')
@@ -43,34 +46,48 @@ export class AppController {
       message.text,
     );
     let text = answer;
-    if (intent !== Intent.QueryState && (!text || score < 0.75)) {
-      text = "I'm not sure what you're saying. Can you try again?";
-      this.logger.log(`unrecognized phrase: "${message.text}"`);
-    } else {
-      switch (intent) {
-        case Intent.Greeting:
-          break;
-        case Intent.OpenDoor:
-          // @TODO open the door
-          break;
-        case Intent.CloseDoor:
-          // @TODO close the door
-          break;
-        case Intent.QueryState:
-          const currentState = this.gpioService.getCurrentDoorState();
-          text = `The door is ${currentState ? 'open' : 'closed'}.`;
-          break;
-        default:
-          text =
-            "I'm afraid I didn't understand that. Can you repeat that please?";
-          this.logger.log(`unrecognized phrase: "${message.text}"`);
-          break;
-      }
+
+    switch (intent) {
+      case Intent.Greeting:
+        text =
+          score > 0.8
+            ? text
+            : "I'm not sure what you mean. Are you just saying hi?";
+        break;
+      case Intent.OpenDoor:
+        // @TODO open the door
+        text =
+          score > 0.8
+            ? text
+            : `I'm not sure what you mean. Are you asking me to open the door?`;
+        break;
+      case Intent.CloseDoor:
+        // @TODO close the door
+        text =
+          score > 0.8
+            ? text
+            : "I'm not sure what you mean. Are you asking me to close the door?";
+        break;
+      case Intent.QueryState:
+        const currentState = this.gpioService.getCurrentDoorState();
+        text = `The door is ${currentState ? 'open' : 'closed'}.`;
+        text =
+          score > 0.8
+            ? text
+            : `I'm not sure what you mean. Are you asking if the garage door is open?`;
+        break;
+      default:
+        text = `I'm afraid I didn't understand that. Can you repeat that please?`;
+        break;
     }
-    await this.slackService.sendText({
-      channel,
-      text,
-    });
+    await this.slackService.sendText({ channel, text });
+
+    if (score <= 0.8 || intent === Intent.None) {
+      await this.slackService.sendText({
+        channel: this.slackLoggingChannel,
+        text: JSON.stringify({ message, intent, score }),
+      });
+    }
   };
 
   doorEventHandler = async (newState: number): Promise<void> => {

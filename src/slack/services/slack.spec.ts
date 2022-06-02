@@ -92,6 +92,12 @@ describe('Slack', () => {
         Starlord: 'W07QCRGGG',
       };
 
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore setting private property; ok for testing
+      provider.channelCache = {
+        'garagebot-log': channelId,
+      };
+
       mockBoltApp.client.conversations.open.mockResolvedValue({
         ok: true,
         channel: { id: channelId },
@@ -130,7 +136,7 @@ describe('Slack', () => {
         try {
           await provider.sendText({
             users: '@Thor',
-            channel: channelId,
+            channel: '#something',
             text: 'hello',
           });
           throw new Error('this should not happen');
@@ -154,35 +160,87 @@ describe('Slack', () => {
     });
 
     describe('users', () => {
-      it('should open the conversation with the appropriate users (multiple)', async () => {
-        await provider.sendText({ users: ['Thor', 'Starlord'], text: 'hello' });
-        expect(mockBoltApp.client.conversations.open.mock.calls.length).toBe(1);
-        expect(mockBoltApp.client.conversations.open.mock.calls[0][0]).toEqual({
-          users: 'W012A3FFF,W07QCRGGG',
+      describe('user names', () => {
+        it('should open the conversation with the appropriate users (multiple)', async () => {
+          await provider.sendText({
+            users: ['@Thor', '@Starlord'],
+            text: 'hello',
+          });
+          expect(mockBoltApp.client.conversations.open.mock.calls.length).toBe(
+            1,
+          );
+          expect(
+            mockBoltApp.client.conversations.open.mock.calls[0][0],
+          ).toEqual({
+            users: 'W012A3FFF,W07QCRGGG',
+          });
+        });
+
+        it('should open the conversation with the appropriate users (single)', async () => {
+          await provider.sendText({ users: '@Thor', text: 'hello' });
+          expect(mockBoltApp.client.conversations.open.mock.calls.length).toBe(
+            1,
+          );
+          expect(
+            mockBoltApp.client.conversations.open.mock.calls[0][0],
+          ).toEqual({
+            users: 'W012A3FFF',
+          });
+        });
+
+        it('should post the message to the new channel', async () => {
+          const text = `hello from ${Date.now()}`;
+          await provider.sendText({ users: ['@Thor', '@Starlord'], text });
+          expect(mockBoltApp.client.chat.postMessage.mock.calls.length).toBe(1);
+          expect(mockBoltApp.client.chat.postMessage.mock.calls[0][0]).toEqual({
+            channel: channelId,
+            text,
+          });
         });
       });
 
-      it('should open the conversation with the appropriate users (single)', async () => {
-        await provider.sendText({ users: 'Thor', text: 'hello' });
-        expect(mockBoltApp.client.conversations.open.mock.calls.length).toBe(1);
-        expect(mockBoltApp.client.conversations.open.mock.calls[0][0]).toEqual({
-          users: 'W012A3FFF',
+      describe('user IDs', () => {
+        it('should open the conversation with the appropriate users (multiple)', async () => {
+          await provider.sendText({
+            users: ['W012A3FFF', 'W07QCRGGG'],
+            text: 'hello',
+          });
+          expect(mockBoltApp.client.conversations.open.mock.calls.length).toBe(
+            1,
+          );
+          expect(
+            mockBoltApp.client.conversations.open.mock.calls[0][0],
+          ).toEqual({
+            users: 'W012A3FFF,W07QCRGGG',
+          });
         });
-      });
 
-      it('should post the message to the new channel', async () => {
-        const text = `hello from ${Date.now()}`;
-        await provider.sendText({ users: ['Thor', 'Starlord'], text });
-        expect(mockBoltApp.client.chat.postMessage.mock.calls.length).toBe(1);
-        expect(mockBoltApp.client.chat.postMessage.mock.calls[0][0]).toEqual({
-          channel: channelId,
-          text,
+        it('should open the conversation with the appropriate users (single)', async () => {
+          await provider.sendText({ users: 'W012A3FFF', text: 'hello' });
+          expect(mockBoltApp.client.conversations.open.mock.calls.length).toBe(
+            1,
+          );
+          expect(
+            mockBoltApp.client.conversations.open.mock.calls[0][0],
+          ).toEqual({
+            users: 'W012A3FFF',
+          });
+        });
+
+        it('should post the message to the new channel', async () => {
+          const text = `hello from ${Date.now()}`;
+          await provider.sendText({ users: ['W012A3FFF', 'W07QCRGGG'], text });
+          expect(mockBoltApp.client.chat.postMessage.mock.calls.length).toBe(1);
+          expect(mockBoltApp.client.chat.postMessage.mock.calls[0][0]).toEqual({
+            channel: channelId,
+            text,
+          });
         });
       });
     });
 
     describe('channel/thread', () => {
-      it('should post the message to the channel/thread', async () => {
+      it('should post the message to the channel ID/thread', async () => {
         const channel = 'A123456';
         const thread = '123456.789';
         const text = `hello from ${Date.now()}`;
@@ -194,11 +252,54 @@ describe('Slack', () => {
           text,
         });
       });
+
+      it('should post the message to the channel name/thread', async () => {
+        const channel = '#garagebot-log';
+        const thread = '123456.789';
+        const text = `hello from ${Date.now()}`;
+        await provider.sendText({ channel, thread, text });
+        expect(mockBoltApp.client.chat.postMessage.mock.calls.length).toBe(1);
+        expect(mockBoltApp.client.chat.postMessage.mock.calls[0][0]).toEqual({
+          channel: channelId,
+          thread_ts: thread,
+          text,
+        });
+      });
+
+      it('should post the message to the channel ID', async () => {
+        const channel = 'A123456';
+        const text = `hello from ${Date.now()}`;
+        await provider.sendText({ channel, text });
+        expect(mockBoltApp.client.chat.postMessage.mock.calls.length).toBe(1);
+        expect(mockBoltApp.client.chat.postMessage.mock.calls[0][0]).toEqual({
+          channel,
+          text,
+        });
+      });
+
+      it('should post the message to the channel name', async () => {
+        const channel = '#garagebot-log';
+        const text = `hello from ${Date.now()}`;
+        await provider.sendText({ channel, text });
+        expect(mockBoltApp.client.chat.postMessage.mock.calls.length).toBe(1);
+        expect(mockBoltApp.client.chat.postMessage.mock.calls[0][0]).toEqual({
+          channel: channelId,
+          text,
+        });
+      });
     });
   });
 
   describe('getUserID', () => {
-    // get the user name from displayname: "@somebody" or "somebody"
+    it('should throw an error if the name does not start with @', async () => {
+      try {
+        await provider.getUserId('spengler');
+        throw new Error('this should not happen');
+      } catch (err) {
+        expect(err.message).toContain('must start with @');
+      }
+    });
+
     it('should call the user list method to get users', async () => {
       const userList = {
         ok: true,
@@ -212,7 +313,7 @@ describe('Slack', () => {
         cache_ts: 1498777272,
       };
       mockBoltApp.client.users.list.mockResolvedValue(userList);
-      await provider.getUserId('spengler');
+      await provider.getUserId('@spengler');
       expect(mockBoltApp.client.users.list.mock.calls.length).toBe(1);
     });
 
@@ -229,7 +330,7 @@ describe('Slack', () => {
         cache_ts: 1498777272,
       };
       mockBoltApp.client.users.list.mockResolvedValue(userList);
-      const result = await provider.getUserId('spengler');
+      const result = await provider.getUserId('@spengler');
       expect(result).toBe('W012A3CDE');
     });
 
@@ -262,7 +363,7 @@ describe('Slack', () => {
         mockBoltApp.client.users.list.mockResolvedValueOnce(userList),
       );
 
-      const result = await provider.getUserId('Starlord');
+      const result = await provider.getUserId('@Starlord');
       expect(result).toBe('W07QCRGGG');
     });
 
@@ -296,7 +397,7 @@ describe('Slack', () => {
       );
 
       try {
-        await provider.getUserId('nobody');
+        await provider.getUserId('@nobody');
         throw new Error('this should not happen');
       } catch (err) {
         expect(err.message).toContain('no user found');
@@ -336,7 +437,7 @@ describe('Slack', () => {
       // @ts-ignore checking private property; ok for testing
       expect(provider.userCache).toEqual({});
 
-      const result = await provider.getUserId('Starlord');
+      const result = await provider.getUserId('@Starlord');
       expect(result).toBe('W07QCRGGG');
 
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -359,23 +460,9 @@ describe('Slack', () => {
         Starlord: 'W07QCRGGG',
       };
 
-      const result = await provider.getUserId('Thor');
-      expect(result).toBe('W012A3FFF');
-      expect(mockBoltApp.client.users.list.mock.calls.length).toBe(0);
-    });
-
-    it('should return the expected value for @display_name', async () => {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore setting private property; ok for testing
-      provider.userCache = {
-        spengler: 'W012A3CDE',
-        'Glinda the Fairly Good': 'W07QCRPA4',
-        Thor: 'W012A3FFF',
-        Starlord: 'W07QCRGGG',
-      };
-
       const result = await provider.getUserId('@Thor');
       expect(result).toBe('W012A3FFF');
+      expect(mockBoltApp.client.users.list.mock.calls.length).toBe(0);
     });
   });
 
@@ -403,6 +490,16 @@ describe('Slack', () => {
       purpose: [Object],
       previous_names: [],
     };
+
+    it('should throw an exception if the channel name does not start with #', async () => {
+      try {
+        await provider.getChannelId('home');
+        throw new Error('this should not happen');
+      } catch (err) {
+        expect(err.message).toContain('must start with #');
+      }
+    });
+
     it('should call the conversations.list method to get channels', async () => {
       const channels = [
         {
@@ -426,7 +523,7 @@ describe('Slack', () => {
         ok: true,
         channels,
       });
-      await provider.getChannelId('home');
+      await provider.getChannelId('#home');
       expect(mockBoltApp.client.conversations.list.mock.calls.length).toBe(1);
     });
 
@@ -480,7 +577,7 @@ describe('Slack', () => {
         ok: true,
         channels: channels[1],
       });
-      const result = await provider.getChannelId('garagebot-logs');
+      const result = await provider.getChannelId('#garagebot-logs');
       expect(result).toBe(channels[0][1].id);
     });
 
@@ -534,7 +631,7 @@ describe('Slack', () => {
         ok: true,
         channels: channels[1],
       });
-      const result = await provider.getChannelId('home-2');
+      const result = await provider.getChannelId('#home-2');
       expect(result).toBe(channels[1][0].id);
     });
 
@@ -563,7 +660,7 @@ describe('Slack', () => {
         response_metadata: {},
       });
       try {
-        await provider.getChannelId('not-a-channel');
+        await provider.getChannelId('#not-a-channel');
         throw new Error('this should not happen');
       } catch (err) {
         expect(err.message).toContain('no channel found');
@@ -623,7 +720,7 @@ describe('Slack', () => {
         ok: true,
         channels: channels[1],
       });
-      await provider.getChannelId('home-2');
+      await provider.getChannelId('#home-2');
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore checking private property; ok for testing
       expect(provider.channelCache).toEqual({
@@ -643,22 +740,9 @@ describe('Slack', () => {
         home: 'C02HS7CA6NM',
         'home-2': 'C02HS7CA6NX',
       };
-      const result = await provider.getChannelId('home-2');
-      expect(result).toBe('C02HS7CA6NX');
-      expect(mockBoltApp.client.conversations.list.mock.calls.length).toBe(0);
-    });
-
-    it('should return the expected value for #channel-name', async () => {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore checking private property; ok for testing
-      provider.channelCache = {
-        'garagebot-logs': 'C03HPS7QH1U',
-        'garagebot-logs-2': 'C03HPS7QH1Y',
-        home: 'C02HS7CA6NM',
-        'home-2': 'C02HS7CA6NX',
-      };
       const result = await provider.getChannelId('#home-2');
       expect(result).toBe('C02HS7CA6NX');
+      expect(mockBoltApp.client.conversations.list.mock.calls.length).toBe(0);
     });
   });
 });

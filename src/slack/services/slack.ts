@@ -71,11 +71,19 @@ export class SlackService implements OnModuleInit {
       }
     }
 
-    users = (await Promise.all(await users.map((user) => this.getUserId(user))))
+    users = (
+      await Promise.all(
+        await users.map((user) =>
+          /^@/.test(user) ? this.getUserId(user) : user,
+        ),
+      )
+    )
       .filter(Boolean)
       .join(',');
 
-    let channelId = channel;
+    let channelId = /^#/.test(channel)
+      ? await this.getChannelId(channel)
+      : channel;
     if (users) {
       const response = await this.boltApp.client.conversations.open({ users });
       channelId = response?.channel?.id;
@@ -91,6 +99,9 @@ export class SlackService implements OnModuleInit {
   }
 
   async getUserId(displayName: string): Promise<string> {
+    if (!/^@/.test(displayName)) {
+      throw new Error('the slack name must start with @');
+    }
     const name = displayName.replace(/^@/, '');
     if (this.userCache[name]) {
       return this.userCache[name];
@@ -119,6 +130,9 @@ export class SlackService implements OnModuleInit {
   }
 
   async getChannelId(channel: string): Promise<string> {
+    if (!/^#/.test(channel)) {
+      throw new Error('the channel name must start with #');
+    }
     const channelName = `${channel}`.replace(/^#/, '');
     if (this.channelCache[channelName]) {
       return this.channelCache[channelName];
