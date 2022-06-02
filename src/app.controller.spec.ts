@@ -172,6 +172,47 @@ describe('AppController', () => {
         text: answer,
       });
     });
+
+    it('should correctly handle a low-confidence message', async () => {
+      const loggingChannel = '#garagebot-logs';
+      const messageChannel = 'A123456';
+      const intent = Intent.QueryState;
+      const score = 0.1;
+
+      const event = {
+        message: {
+          channel: messageChannel,
+          text: 'is the door open?',
+        },
+      };
+
+      mockNlpService.process.mockResolvedValue({ intent, score });
+
+      await appController.messageHandler(event);
+
+      expect(mockSlackService.sendText.mock.calls.length).toBe(2);
+
+      expect(mockSlackService.sendText.mock.calls[0][0].channel).toBe(
+        messageChannel,
+      );
+      expect(mockSlackService.sendText.mock.calls[0][0].text).toContain(
+        'not sure',
+      );
+      expect(mockSlackService.sendText.mock.calls[0][0].text).toContain(
+        'garage door is open',
+      );
+
+      expect(mockSlackService.sendText.mock.calls[1][0].channel).toBe(
+        loggingChannel,
+      );
+      expect(mockSlackService.sendText.mock.calls[1][0].text).toBe(
+        JSON.stringify({
+          message: event.message,
+          intent,
+          score,
+        }),
+      );
+    });
   });
 
   describe('doorSensorHandler', () => {
