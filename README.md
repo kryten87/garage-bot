@@ -37,6 +37,7 @@ The brains of the bot. Processes input from Slack and outputs the resulting acti
 ✅ 0.7.0 - logging (to slack?)
 ✅ 0.7.1 - review logging
 ✅ 0.8.0 - add help text
+0.9.0 - NodeJS 12
 1.0.0 - initial release
 1.1.0 - Python PiFace Digital 2? To interface with relays & IO
 1.1.0 - add garage door open/close functionality
@@ -44,6 +45,10 @@ The brains of the bot. Processes input from Slack and outputs the resulting acti
 1.3.0 - deployment (automated?)
 
 #### Notes
+
+**Switch to Raspberry Pi A+**
+
+This is an older model. Need to see if we can get it running on that hardware using the Piface Digital 2.
 
 **PiFace Digital 2**
 
