@@ -35,7 +35,7 @@ The brains of the bot. Processes input from Slack and outputs the resulting acti
 ✅ 0.6.2 - correct messages
 ✅ 0.6.3 - correct door open/closed query
 ✅ 0.7.0 - logging (to slack?)
-0.7.1 - review logging
+✅ 0.7.1 - review logging
 0.8.0 - add help text
 1.0.0 - initial release
 1.1.0 - Python PiFace Digital 2? To interface with relays & IO
