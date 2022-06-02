@@ -10,6 +10,7 @@ export enum Intent {
   OpenDoor = 'OPEN_DOOR',
   CloseDoor = 'CLOSE_DOOR',
   QueryState = 'QUERY_STATE',
+  Help = 'HELP',
 }
 
 const documents = [
@@ -18,6 +19,7 @@ const documents = [
   ['can you hear me', Intent.Greeting],
   ['are you running', Intent.Greeting],
   ['are you up', Intent.Greeting],
+  ['ping', Intent.Greeting],
 
   ['open the garage door', Intent.OpenDoor],
   ['open the door', Intent.OpenDoor],
@@ -40,6 +42,13 @@ const documents = [
   ['state', Intent.QueryState],
   ['door state', Intent.QueryState],
   ["what's the door state", Intent.QueryState],
+
+  ['help', Intent.Help],
+  ['help me', Intent.Help],
+  ['can you help me', Intent.Help],
+  ['what do i do', Intent.Help],
+  ['what can i do', Intent.Help],
+  ['what should i do', Intent.Help],
 ];
 
 const answers = [
