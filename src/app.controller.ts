@@ -77,13 +77,13 @@ export class AppController {
         break;
       case Intent.Help:
         text = [
-          "Hi there! I understand you're looking for some help...\n",
-          'I can do a bunch of things, like check to see if the door is open or closed. Try asking "Is it open?" or "Are you open?" to see where the door is now.\n',
-          'In the future, you might be able to open or close the door by saying "Open up!" or "Shut it!".\n',
+          "Hi there! I understand you're looking for some help...",
+          'I can do a bunch of things, like check to see if the door is open or closed. Try asking "Is it open?" or "Are you open?" to see where the door is now.',
+          'In the future, you might be able to open or close the door by saying "Open up!" or "Shut it!".',
           'I am able to understand a whole bunch of simple phrases, so try different variations.',
         ]
           .map((line) => line.trim())
-          .join('');
+          .join(' ');
         break;
       default:
         text = `I'm afraid I didn't understand that. Can you repeat that please?`;
