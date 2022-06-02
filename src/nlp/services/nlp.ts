@@ -5,6 +5,7 @@ import { NlpManager } from 'node-nlp';
 const locale = 'en';
 
 export enum Intent {
+  None = 'None',
   Greeting = 'GREETING',
   OpenDoor = 'OPEN_DOOR',
   CloseDoor = 'CLOSE_DOOR',
