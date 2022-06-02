@@ -91,6 +91,9 @@ export class SlackService implements OnModuleInit {
   }
 
   async getUserId(displayName: string): Promise<string> {
+    if (!/^@/.test(displayName)) {
+      throw new Error('the slack name must start with @');
+    }
     const name = displayName.replace(/^@/, '');
     if (this.userCache[name]) {
       return this.userCache[name];
