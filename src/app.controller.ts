@@ -52,32 +52,41 @@ export class AppController {
         text =
           score > 0.8
             ? text
-            : "I'm not sure what you mean. Are you just saying hi?";
+            : "I'm not sure what you mean. Are you just saying hi? Try asking for help if you need more info.";
         break;
       case Intent.OpenDoor:
         // @TODO open the door
         text =
           score > 0.8
             ? text
-            : `I'm not sure what you mean. Are you asking me to open the door?`;
+            : `I'm not sure what you mean. Are you asking me to open the door? Try asking for help if you need more info.`;
         break;
       case Intent.CloseDoor:
         // @TODO close the door
         text =
           score > 0.8
             ? text
-            : "I'm not sure what you mean. Are you asking me to close the door?";
+            : "I'm not sure what you mean. Are you asking me to close the door? Try asking for help if you need more info.";
         break;
       case Intent.QueryState:
         const currentState = this.gpioService.getCurrentDoorState();
-        text = `The door is ${currentState ? 'open' : 'closed'}.`;
         text =
           score > 0.8
-            ? text
-            : `I'm not sure what you mean. Are you asking if the garage door is open?`;
+            ? `The door is ${currentState ? 'open' : 'closed'}.`
+            : `I'm not sure what you mean. Are you asking if the garage door is open? Try asking for help if you need more info.`;
+        break;
+      case Intent.Help:
+        text = [
+          "Hi there! I understand you're looking for some help...",
+          'I can do a bunch of things, like check to see if the door is open or closed. Try asking "Is it open?" or "Are you open?" to see where the door is now.',
+          'In the future, you might be able to open or close the door by saying "Open up!" or "Shut it!".',
+          'I am able to understand a whole bunch of simple phrases, so try different variations.',
+        ]
+          .map((line) => line.trim())
+          .join(' ');
         break;
       default:
-        text = `I'm afraid I didn't understand that. Can you repeat that please?`;
+        text = `I'm afraid I didn't understand that. Can you repeat that please? Try asking for help if you need more info.`;
         break;
     }
     await this.slackService.sendText({ channel, text });
