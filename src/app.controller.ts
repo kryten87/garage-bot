@@ -77,14 +77,12 @@ export class AppController {
             : `I'm not sure what you mean. Are you asking if the garage door is open?`;
         break;
       default:
-        text =
-          "I'm afraid I didn't understand that. Can you repeat that please?";
-        text = score > 0.8 ? text : `I'm not sure what you mean. ${intent}`;
+        text = `I'm afraid I didn't understand that. Can you repeat that please?`;
         break;
     }
     await this.slackService.sendText({ channel, text });
 
-    if (score <= 0.8) {
+    if (score <= 0.8 || intent === Intent.None) {
       await this.slackService.sendText({
         channel: this.slackLoggingChannel,
         text: JSON.stringify({ message, intent, score }),
