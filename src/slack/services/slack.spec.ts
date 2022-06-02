@@ -92,6 +92,12 @@ describe('Slack', () => {
         Starlord: 'W07QCRGGG',
       };
 
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore setting private property; ok for testing
+      provider.channelCache = {
+        'garagebot-log': channelId,
+      };
+
       mockBoltApp.client.conversations.open.mockResolvedValue({
         ok: true,
         channel: { id: channelId },
@@ -130,7 +136,7 @@ describe('Slack', () => {
         try {
           await provider.sendText({
             users: '@Thor',
-            channel: channelId,
+            channel: '#something',
             text: 'hello',
           });
           throw new Error('this should not happen');
@@ -185,7 +191,7 @@ describe('Slack', () => {
     });
 
     describe('channel/thread', () => {
-      it('should post the message to the channel/thread', async () => {
+      it('should post the message to the channel ID/thread', async () => {
         const channel = 'A123456';
         const thread = '123456.789';
         const text = `hello from ${Date.now()}`;
@@ -194,6 +200,41 @@ describe('Slack', () => {
         expect(mockBoltApp.client.chat.postMessage.mock.calls[0][0]).toEqual({
           channel,
           thread_ts: thread,
+          text,
+        });
+      });
+
+      it('should post the message to the channel name/thread', async () => {
+        const channel = '#garagebot-log';
+        const thread = '123456.789';
+        const text = `hello from ${Date.now()}`;
+        await provider.sendText({ channel, thread, text });
+        expect(mockBoltApp.client.chat.postMessage.mock.calls.length).toBe(1);
+        expect(mockBoltApp.client.chat.postMessage.mock.calls[0][0]).toEqual({
+          channel: channelId,
+          thread_ts: thread,
+          text,
+        });
+      });
+
+      it('should post the message to the channel ID', async () => {
+        const channel = 'A123456';
+        const text = `hello from ${Date.now()}`;
+        await provider.sendText({ channel, text });
+        expect(mockBoltApp.client.chat.postMessage.mock.calls.length).toBe(1);
+        expect(mockBoltApp.client.chat.postMessage.mock.calls[0][0]).toEqual({
+          channel,
+          text,
+        });
+      });
+
+      it('should post the message to the channel name', async () => {
+        const channel = '#garagebot-log';
+        const text = `hello from ${Date.now()}`;
+        await provider.sendText({ channel, text });
+        expect(mockBoltApp.client.chat.postMessage.mock.calls.length).toBe(1);
+        expect(mockBoltApp.client.chat.postMessage.mock.calls[0][0]).toEqual({
+          channel: channelId,
           text,
         });
       });
