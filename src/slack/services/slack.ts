@@ -71,7 +71,13 @@ export class SlackService implements OnModuleInit {
       }
     }
 
-    users = (await Promise.all(await users.map((user) => this.getUserId(user))))
+    users = (
+      await Promise.all(
+        await users.map((user) =>
+          /^@/.test(user) ? this.getUserId(user) : user,
+        ),
+      )
+    )
       .filter(Boolean)
       .join(',');
 
