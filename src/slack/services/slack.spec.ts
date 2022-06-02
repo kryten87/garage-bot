@@ -166,16 +166,24 @@ describe('Slack', () => {
             users: ['@Thor', '@Starlord'],
             text: 'hello',
           });
-          expect(mockBoltApp.client.conversations.open.mock.calls.length).toBe(1);
-          expect(mockBoltApp.client.conversations.open.mock.calls[0][0]).toEqual({
+          expect(mockBoltApp.client.conversations.open.mock.calls.length).toBe(
+            1,
+          );
+          expect(
+            mockBoltApp.client.conversations.open.mock.calls[0][0],
+          ).toEqual({
             users: 'W012A3FFF,W07QCRGGG',
           });
         });
 
         it('should open the conversation with the appropriate users (single)', async () => {
           await provider.sendText({ users: '@Thor', text: 'hello' });
-          expect(mockBoltApp.client.conversations.open.mock.calls.length).toBe(1);
-          expect(mockBoltApp.client.conversations.open.mock.calls[0][0]).toEqual({
+          expect(mockBoltApp.client.conversations.open.mock.calls.length).toBe(
+            1,
+          );
+          expect(
+            mockBoltApp.client.conversations.open.mock.calls[0][0],
+          ).toEqual({
             users: 'W012A3FFF',
           });
         });
@@ -183,6 +191,45 @@ describe('Slack', () => {
         it('should post the message to the new channel', async () => {
           const text = `hello from ${Date.now()}`;
           await provider.sendText({ users: ['@Thor', '@Starlord'], text });
+          expect(mockBoltApp.client.chat.postMessage.mock.calls.length).toBe(1);
+          expect(mockBoltApp.client.chat.postMessage.mock.calls[0][0]).toEqual({
+            channel: channelId,
+            text,
+          });
+        });
+      });
+
+      describe('user IDs', () => {
+        it('should open the conversation with the appropriate users (multiple)', async () => {
+          await provider.sendText({
+            users: ['W012A3FFF', 'W07QCRGGG'],
+            text: 'hello',
+          });
+          expect(mockBoltApp.client.conversations.open.mock.calls.length).toBe(
+            1,
+          );
+          expect(
+            mockBoltApp.client.conversations.open.mock.calls[0][0],
+          ).toEqual({
+            users: 'W012A3FFF,W07QCRGGG',
+          });
+        });
+
+        it('should open the conversation with the appropriate users (single)', async () => {
+          await provider.sendText({ users: 'W012A3FFF', text: 'hello' });
+          expect(mockBoltApp.client.conversations.open.mock.calls.length).toBe(
+            1,
+          );
+          expect(
+            mockBoltApp.client.conversations.open.mock.calls[0][0],
+          ).toEqual({
+            users: 'W012A3FFF',
+          });
+        });
+
+        it('should post the message to the new channel', async () => {
+          const text = `hello from ${Date.now()}`;
+          await provider.sendText({ users: ['W012A3FFF', 'W07QCRGGG'], text });
           expect(mockBoltApp.client.chat.postMessage.mock.calls.length).toBe(1);
           expect(mockBoltApp.client.chat.postMessage.mock.calls[0][0]).toEqual({
             channel: channelId,
