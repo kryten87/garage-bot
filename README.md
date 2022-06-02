@@ -45,6 +45,10 @@ The brains of the bot. Processes input from Slack and outputs the resulting acti
 
 #### Notes
 
+**Switch to Raspberry Pi A+**
+
+This is an older model. Need to see if we can get it running on that hardware using the Piface Digital 2.
+
 **PiFace Digital 2**
 
 The PiFace is old and not particularly up to date. There is a NodeJS package, but it's obsolete. The [Python package](https://github.com/piface/pifacedigitalio) might still work. In that case, I need a way for the Python package to handle the IO, and communicate with the NodeJS application.
