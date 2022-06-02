@@ -122,6 +122,9 @@ export class SlackService implements OnModuleInit {
   }
 
   async getChannelId(channel: string): Promise<string> {
+    if (!/^#/.test(channel)) {
+      throw new Error('the channel name must start with #');
+    }
     const channelName = `${channel}`.replace(/^#/, '');
     if (this.channelCache[channelName]) {
       return this.channelCache[channelName];
