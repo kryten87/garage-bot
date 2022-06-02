@@ -9,11 +9,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 describe('AppController', () => {
   let appController: AppController;
 
+  const loggingChannel = 'garagebot-logs';
   const messageRecipients = 'Alpha,Bravo,Charlie';
-
-  const mockConfigService = {
-    get: jest.fn().mockReturnValue(messageRecipients),
-  };
 
   const mockGpioService = {
     onDoorEvent: jest.fn(),
@@ -30,6 +27,13 @@ describe('AppController', () => {
   };
 
   beforeEach(async () => {
+    const mockConfigService = {
+      get: jest
+        .fn()
+        .mockReturnValueOnce(loggingChannel)
+        .mockReturnValueOnce(messageRecipients),
+    };
+
     mockGpioService.onDoorEvent.mockClear();
     mockNlpService.process.mockClear();
     mockSlackService.onMessage.mockClear();
@@ -174,7 +178,6 @@ describe('AppController', () => {
     });
 
     it('should correctly handle a low-confidence message', async () => {
-      const loggingChannel = '#garagebot-logs';
       const messageChannel = 'A123456';
       const intent = Intent.QueryState;
       const score = 0.1;

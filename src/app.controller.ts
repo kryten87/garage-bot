@@ -17,7 +17,9 @@ export class AppController {
     private readonly nlpService: NlpService,
     private readonly slackService: SlackService,
   ) {
-    this.slackLoggingChannel = this.configService.get<string>('SLACK_LOGGING_CHANNEL');
+    this.slackLoggingChannel = this.configService.get<string>(
+      'SLACK_LOGGING_CHANNEL',
+    );
     this.messageRecipients = this.configService
       .get<string>('SLACK_DOOR_EVENT_RECIPIENTS')
       .split(',')
@@ -80,10 +82,7 @@ export class AppController {
         text = score > 0.8 ? text : `I'm not sure what you mean. ${intent}`;
         break;
     }
-    await this.slackService.sendText({
-      channel,
-      text,
-    });
+    await this.slackService.sendText({ channel, text });
 
     if (score <= 0.8) {
       await this.slackService.sendText({
