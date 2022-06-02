@@ -155,7 +155,10 @@ describe('Slack', () => {
 
     describe('users', () => {
       it('should open the conversation with the appropriate users (multiple)', async () => {
-        await provider.sendText({ users: ['Thor', 'Starlord'], text: 'hello' });
+        await provider.sendText({
+          users: ['@Thor', '@Starlord'],
+          text: 'hello',
+        });
         expect(mockBoltApp.client.conversations.open.mock.calls.length).toBe(1);
         expect(mockBoltApp.client.conversations.open.mock.calls[0][0]).toEqual({
           users: 'W012A3FFF,W07QCRGGG',
@@ -163,7 +166,7 @@ describe('Slack', () => {
       });
 
       it('should open the conversation with the appropriate users (single)', async () => {
-        await provider.sendText({ users: 'Thor', text: 'hello' });
+        await provider.sendText({ users: '@Thor', text: 'hello' });
         expect(mockBoltApp.client.conversations.open.mock.calls.length).toBe(1);
         expect(mockBoltApp.client.conversations.open.mock.calls[0][0]).toEqual({
           users: 'W012A3FFF',
@@ -172,7 +175,7 @@ describe('Slack', () => {
 
       it('should post the message to the new channel', async () => {
         const text = `hello from ${Date.now()}`;
-        await provider.sendText({ users: ['Thor', 'Starlord'], text });
+        await provider.sendText({ users: ['@Thor', '@Starlord'], text });
         expect(mockBoltApp.client.chat.postMessage.mock.calls.length).toBe(1);
         expect(mockBoltApp.client.chat.postMessage.mock.calls[0][0]).toEqual({
           channel: channelId,
@@ -198,7 +201,15 @@ describe('Slack', () => {
   });
 
   describe('getUserID', () => {
-    // get the user name from displayname: "@somebody" or "somebody"
+    it('should throw an error if the name does not start with @', async () => {
+      try {
+        await provider.getUserId('spengler');
+        throw new Error('this should not happen');
+      } catch (err) {
+        expect(err.message).toContain('must start with @');
+      }
+    });
+
     it('should call the user list method to get users', async () => {
       const userList = {
         ok: true,
@@ -212,7 +223,7 @@ describe('Slack', () => {
         cache_ts: 1498777272,
       };
       mockBoltApp.client.users.list.mockResolvedValue(userList);
-      await provider.getUserId('spengler');
+      await provider.getUserId('@spengler');
       expect(mockBoltApp.client.users.list.mock.calls.length).toBe(1);
     });
 
@@ -229,7 +240,7 @@ describe('Slack', () => {
         cache_ts: 1498777272,
       };
       mockBoltApp.client.users.list.mockResolvedValue(userList);
-      const result = await provider.getUserId('spengler');
+      const result = await provider.getUserId('@spengler');
       expect(result).toBe('W012A3CDE');
     });
 
@@ -262,7 +273,7 @@ describe('Slack', () => {
         mockBoltApp.client.users.list.mockResolvedValueOnce(userList),
       );
 
-      const result = await provider.getUserId('Starlord');
+      const result = await provider.getUserId('@Starlord');
       expect(result).toBe('W07QCRGGG');
     });
 
@@ -296,7 +307,7 @@ describe('Slack', () => {
       );
 
       try {
-        await provider.getUserId('nobody');
+        await provider.getUserId('@nobody');
         throw new Error('this should not happen');
       } catch (err) {
         expect(err.message).toContain('no user found');
@@ -336,7 +347,7 @@ describe('Slack', () => {
       // @ts-ignore checking private property; ok for testing
       expect(provider.userCache).toEqual({});
 
-      const result = await provider.getUserId('Starlord');
+      const result = await provider.getUserId('@Starlord');
       expect(result).toBe('W07QCRGGG');
 
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -359,7 +370,7 @@ describe('Slack', () => {
         Starlord: 'W07QCRGGG',
       };
 
-      const result = await provider.getUserId('Thor');
+      const result = await provider.getUserId('@Thor');
       expect(result).toBe('W012A3FFF');
       expect(mockBoltApp.client.users.list.mock.calls.length).toBe(0);
     });
