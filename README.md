@@ -61,10 +61,11 @@ The PiFace is old and not particularly up to date. There is a NodeJS package, bu
 [Documentation](https://pifacedigitalio.readthedocs.io/pifacedigital.html)
 
 Plan: need new Python service that
-- listens for changes on GPIO input
-- listens for input from NodeJS app on named pipe to
-  - trigger relay to open/close
-  - trigger relay to turn on/off light for camera
+- provides a "dumb" wrapper over the PiFace digital API
+- send a query to the INPUT pipe and receive values from the OUTPUT pipe:
+  - to get an input value:  `{ query: <input #> }`; returns `true` (high) or `false` (low)
+  - to set an output value: `{ set: { <output #>: true | false } }` to set the output high/low; no return value
+  - to turn on/off a relay: `{ relay: { <relay #>: true | false } }` to set the relay to `true` (open) or `false` (closed); no return value
 
 Pseudocode:
 
