@@ -1,7 +1,7 @@
 # import pifacedigitalio
-import time
 import os
 import select
+import json
 
 # the number of seconds to press the button the garage remote
 # @TODO figure out how long to delay to trigger the remote
@@ -20,72 +20,108 @@ LIGHT_RELAY = 1
 
 # piface = pifacedigitalio.PiFaceDigital()
 
+def log(message):
+  print f'[GPIO Driver] {message}'
+
 def querySwitch(number):
+  log(f'querying input {number}')
   return False
   # return piface.switches[number].value
 
 def setOutput(number, state):
+  log(f'setting output {number} to {state}')
   if state:
     print("setting output on", number)
     # piface.output_pins[number].turn_on()
   else:
     print("setting output off", number)
     # piface.output_pins[number].turn_off()
+  return True;
 
 def setRelay(number, state):
+  log(f'setting relay {number} to {state}')
   if state:
     print("setting relay on", number)
     # piface.relays[number].turn_on()
   else:
     print("setting relay off", number)
     # piface.relays[number].turn_off()
-
-def handleIncomingMessage(message):
-  return message
+  return True;
 
 def createPipe(pipeName, flags):
+  log(f'creating pipe {pipeName}')
   os.mkfifo(pipeName)
   return os.open(pipeName,flags)
 
 def getMessage(pipe):
+  log("getting message from pipe")
   return os.read(pipe, 20 * 1024);
 
 if __name__ == "__main__":
-  # create the pipes
-  #
-  print("creating pipe")
+  log("creating input pipe")
   inputPipe = createPipe(INPUT_PIPE, os.O_RDONLY | os.O_NONBLOCK)
 
   try:
-    print("waiting for output pipe to open")
+    log("waiting for output pipe to open")
+    # loop until the output pipe shows up
+    #
     while True:
       try:
         outputPipe = os.open(OUTPUT_PIPE, os.O_WRONLY)
-        print("output pipe ready")
         break
       except:
         # wait for output pipe to get initialized
         pass
 
-    print("output pipe open; waiting for input")
+    log("output pipe open; waiting for input")
     try:
+      # intialize the poller
+      #
       poll = select.poll()
       poll.register(inputPipe, select.POLLIN)
 
       try:
+        # loop forever...
+        #
         while True:
           # check the INPUT_PIPE for a request
           #
           if (inputPipe, select.POLLIN) in poll.poll(100):
+            # get the input from the pipe
+            #
             msg = getMessage(inputPipe)
-            print("got message", msg)
-            msg = handleIncomingMessage(msg)
-            print("received", msg)
-            os.write(outputPipe, msg)
+
+            # JSON parse the message
+            #
+            value = json.loads(msg)
+
+            # get the result from the appropriate function
+            #
+            result = False
+            if "input" in value:
+              result = querySwitch(value["input"])
+            elif "output" in value:
+              pin = list(value["output"].keys())[0]
+              state = value["output"][pin]
+              result = setOutput(pin, state)
+            elif "relay" in value:
+              relay = list(value["relay"].keys())[0]
+              state = value["relay"][relay]
+              result = setRelay(relay, state)
+
+            # write the response to the pipe
+            #
+            os.write(outputPipe, json.dumps(result).encode())
       finally:
+        # shut down the poller
+        #
         poll.unregister(inputPipe)
     finally:
+      # close the input pipe
+      #
       os.close(inputPipe)
   finally:
+    # remove both pipes
+    #
     os.remove(INPUT_PIPE)
     os.remove(OUTPUT_PIPE)
