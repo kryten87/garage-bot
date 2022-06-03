@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { ConfigService } from '@nestjs/config';
-import { GpioService } from './gpio';
+import { GpioService, OUTPUT_PIPE } from './gpio';
 import { Test, TestingModule } from '@nestjs/testing';
 
 const pause = (duration: number): Promise<void> =>
@@ -136,6 +136,66 @@ describe('Gpio', () => {
       expect(provider.inputState[doorPin]).toEqual([0, 0, 0]);
       expect(handler.mock.calls.length).toBe(2);
       expect(handler.mock.calls[1][0]).toBe(0);
+    });
+  });
+
+  describe('readFromOutputStream', () => {
+    let listener;
+
+    beforeEach(() => {
+      provider.outputStream = {
+        addEventListener: jest.fn((event, handler) => {
+          listener = handler;
+        }),
+      };
+    });
+
+    it('should add an event listener', async () => {
+      const resultPromise = provider.readFromOutputStream();
+      expect(provider.outputStream.addEventListener.mock.calls.length).toBe(1);
+      listener(true);
+      await resultPromise;
+    });
+
+    it('should return the expected value when the callback is called', async () => {
+      const data = true;
+      const resultPromise = provider.readFromOutputStream();
+      listener(data);
+      const result = await resultPromise;
+      expect(result).toBe(data);
+    });
+
+    it('should throw an error if the timeout expires without the callback being called', async () => {
+      try {
+        await provider.readFromOutputStream();
+        throw new Error('this should not happen');
+      } catch (err) {
+        expect(err.message).toContain('timed out');
+      }
+    });
+  });
+
+  describe('request', () => {
+    beforeEach(() => {
+      provider.inputStream = { write: jest.fn() };
+      provider.readFromOutputStream = jest.fn();
+    });
+
+    it('should send the request to the INPUT pipe', async () => {
+      const query = { input: 0 };
+      await provider.request(query);
+      expect(provider.inputStream.write.mock.calls.length).toBe(1);
+      expect(provider.inputStream.write.mock.calls[0][0]).toBe(
+        JSON.stringify(query),
+      );
+      expect(true).toBe(true);
+    });
+
+    it('should retrieve the reponse from the OUTPUT pipe', async () => {
+      const query = { input: 0 };
+      await provider.request(query);
+      // @ts-ignore method overwritten by mock; ok for testing
+      expect(provider.readFromOutputStream.mock.calls.length).toBe(1);
     });
   });
 });
