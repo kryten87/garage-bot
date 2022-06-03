@@ -40,6 +40,16 @@ export class AppController {
     return this.appService.getHello();
   }
 
+  @Get('gpio')
+  async testGpio(): Promise<string> {
+    const results = [
+      await this.gpioService.request({ input: 1 }),
+      await this.gpioService.request({ output: { 1: true } }),
+      await this.gpioService.request({ relay: { 1: true } }),
+    ];
+    return `<pre>${JSON.stringify(results, null, 2)}</pre>`;
+  }
+
   messageHandler = async ({ message }): Promise<void> => {
     const { channel } = message;
     const { intent, score, answer } = await this.nlpService.process(
