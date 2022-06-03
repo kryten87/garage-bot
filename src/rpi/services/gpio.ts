@@ -8,8 +8,8 @@ import {
 
 // INPUT to Python driver -- so we send commands on the input pipe; listen for
 // responses on the output pipe
-export const INPUT_PIPE = 'gpio_driver_input';
-export const OUTPUT_PIPE = 'gpio_driver_output';
+export const INPUT_PIPE = '/tmp/gpio_driver_input';
+export const OUTPUT_PIPE = '/tmp/gpio_driver_output';
 
 export const TIMEOUT = 1000;
 

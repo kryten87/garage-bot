@@ -10,8 +10,8 @@ GARAGE_REMOTE_PRESS_LENGTH = 1
 
 # INPUT to Python driver -- so we send commands on the input pipe; listen for
 # responses on the output pipe
-INPUT_PIPE = 'gpio_driver_input'
-OUTPUT_PIPE = 'gpio_driver_output'
+INPUT_PIPE = '/tmp/gpio_driver_input'
+OUTPUT_PIPE = '/tmp/gpio_driver_output'
 
 DOOR_SWITCH_INPUT = 0
 
