@@ -1,0 +1,13 @@
+[Unit]
+Description=Homebot GPIO Driver - The driver for the service
+After=network.target
+
+[Service]
+Type=simple
+User=dave
+WorkingDirectory=/home/dave/gpio-driver
+ExecStart=/usr/bin/python3 /home/dave/gpio-driver/gpio-driver.py
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
