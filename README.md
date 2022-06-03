@@ -63,7 +63,7 @@ The PiFace is old and not particularly up to date. There is a NodeJS package, bu
 Plan: need new Python service that
 - provides a "dumb" wrapper over the PiFace digital API
 - send a query to the INPUT pipe and receive values from the OUTPUT pipe:
-  - to get an input value:  `{ query: <input #> }`; returns `true` (high) or `false` (low)
+  - to get an input value:  `{ input: <input #> }`; returns `true` (high) or `false` (low)
   - to set an output value: `{ output: { <output #>: true | false } }` to set the output high/low; return `true` if no problems
   - to turn on/off a relay: `{ relay: { <relay #>: true | false } }` to set the relay to `true` (open) or `false` (closed); return `true` if no problems
 
