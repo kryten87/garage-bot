@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { ConfigService } from '@nestjs/config';
-import { GpioService, OUTPUT_PIPE } from './gpio';
+import { GpioService } from './gpio';
 import { Test, TestingModule } from '@nestjs/testing';
 
 const pause = (duration: number): Promise<void> =>
@@ -143,6 +143,7 @@ describe('Gpio', () => {
     let listener;
 
     beforeEach(() => {
+      // @ts-ignore private property; ok for testing
       provider.outputStream = {
         addEventListener: jest.fn((event, handler) => {
           listener = handler;
@@ -152,6 +153,7 @@ describe('Gpio', () => {
 
     it('should add an event listener', async () => {
       const resultPromise = provider.readFromOutputStream();
+      // @ts-ignore private property; ok for testing
       expect(provider.outputStream.addEventListener.mock.calls.length).toBe(1);
       listener(true);
       await resultPromise;
@@ -177,6 +179,7 @@ describe('Gpio', () => {
 
   describe('request', () => {
     beforeEach(() => {
+      // @ts-ignore private property; ok for testing
       provider.inputStream = { write: jest.fn() };
       provider.readFromOutputStream = jest.fn();
     });
@@ -184,7 +187,9 @@ describe('Gpio', () => {
     it('should send the request to the INPUT pipe', async () => {
       const query = { input: 0 };
       await provider.request(query);
+      // @ts-ignore private property; ok for testing
       expect(provider.inputStream.write.mock.calls.length).toBe(1);
+      // @ts-ignore private property; ok for testing
       expect(provider.inputStream.write.mock.calls[0][0]).toBe(
         JSON.stringify(query),
       );
