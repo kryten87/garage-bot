@@ -77,6 +77,7 @@ describe('Gpio', () => {
 
   describe('polling', () => {
     it('should trigger the event handler correctly', async () => {
+      provider.getCurrentDoorState = jest.fn();
       const handler = jest.fn();
       provider.onDoorEvent(handler);
 
@@ -85,7 +86,8 @@ describe('Gpio', () => {
       expect(provider.inputState[doorPin]).toEqual([0, 0, 0]);
 
       // read = 0
-      mockRpio.read.mockReturnValue(0);
+      // @ts-ignore mocked method for testing
+      provider.getCurrentDoorState.mockResolvedValueOnce(0);
       // wait for the polling interval + 5 ms
       await pause(pollingInterval + 5);
       // @ts-ignore checking private property; ok for testing
@@ -93,7 +95,8 @@ describe('Gpio', () => {
       expect(handler.mock.calls.length).toBe(0);
 
       // read = 1
-      mockRpio.read.mockReturnValue(1);
+      // @ts-ignore mocked method for testing
+      provider.getCurrentDoorState.mockResolvedValueOnce(1);
       // wait for the polling interval + 5 ms
       await pause(pollingInterval + 5);
       // @ts-ignore checking private property; ok for testing
@@ -101,7 +104,8 @@ describe('Gpio', () => {
       expect(handler.mock.calls.length).toBe(0);
 
       // read = 1
-      mockRpio.read.mockReturnValue(1);
+      // @ts-ignore mocked method for testing
+      provider.getCurrentDoorState.mockResolvedValueOnce(1);
       // wait for the polling interval + 5 ms
       await pause(pollingInterval + 5);
       // @ts-ignore checking private property; ok for testing
@@ -109,7 +113,8 @@ describe('Gpio', () => {
       expect(handler.mock.calls.length).toBe(0);
 
       // read = 1
-      mockRpio.read.mockReturnValue(1);
+      // @ts-ignore mocked method for testing
+      provider.getCurrentDoorState.mockResolvedValueOnce(1);
       // wait for the polling interval + 5 ms
       await pause(pollingInterval + 5);
       // @ts-ignore checking private property; ok for testing
@@ -118,7 +123,8 @@ describe('Gpio', () => {
       expect(handler.mock.calls[0][0]).toBe(1);
 
       // read = 1
-      mockRpio.read.mockReturnValue(1);
+      // @ts-ignore mocked method for testing
+      provider.getCurrentDoorState.mockResolvedValueOnce(1);
       // wait for the polling interval + 5 ms
       await pause(pollingInterval + 5);
       // @ts-ignore checking private property; ok for testing
@@ -126,7 +132,8 @@ describe('Gpio', () => {
       expect(handler.mock.calls.length).toBe(1);
 
       // read = 0
-      mockRpio.read.mockReturnValue(0);
+      // @ts-ignore mocked method for testing
+      provider.getCurrentDoorState.mockResolvedValueOnce(0);
       // wait for the polling interval + 5 ms
       await pause(pollingInterval + 5);
       // @ts-ignore checking private property; ok for testing
@@ -134,7 +141,8 @@ describe('Gpio', () => {
       expect(handler.mock.calls.length).toBe(1);
 
       // read = 0
-      mockRpio.read.mockReturnValue(0);
+      // @ts-ignore mocked method for testing
+      provider.getCurrentDoorState.mockResolvedValueOnce(0);
       // wait for the polling interval + 5 ms
       await pause(pollingInterval + 5);
       // @ts-ignore checking private property; ok for testing
@@ -142,7 +150,8 @@ describe('Gpio', () => {
       expect(handler.mock.calls.length).toBe(1);
 
       // read = 0
-      mockRpio.read.mockReturnValue(0);
+      // @ts-ignore mocked method for testing
+      provider.getCurrentDoorState.mockResolvedValueOnce(0);
       // wait for the polling interval + 5 ms
       await pause(pollingInterval + 5);
       // @ts-ignore checking private property; ok for testing
@@ -163,6 +172,8 @@ describe('Gpio', () => {
           listener = handler;
         }),
       };
+      // @ts-ignore private property; ok for testing
+      provider.inputStream = { write: jest.fn() };
     });
 
     it('should add an event listener', async () => {
