@@ -5,6 +5,8 @@ import {
   OnModuleDestroy,
   OnModuleInit,
 } from '@nestjs/common';
+import { ReadStream, WriteStream } from 'fs';
+import { spawn } from 'child_process';
 
 // INPUT to Python driver -- so we send commands on the input pipe; listen for
 // responses on the output pipe
@@ -27,12 +29,13 @@ export class GpioService implements OnModuleInit, OnModuleDestroy {
   private doorEventHandler: any[] = [];
   private currentState: { [pin: number]: number } = {};
   private inputState: { [pin: number]: number[] } = {};
-  private inputStream: any;
-  private outputStream: any;
+  private inputStream: WriteStream;
+  private outputStream: ReadStream;
 
   constructor(
     private readonly configService: ConfigService,
     @Inject('RPIO') private readonly rpio: any,
+    @Inject('FILESYSTEM') private readonly fileSystem: any,
   ) {
     // initialize the RPIO package
     this.rpio.init();
@@ -56,6 +59,8 @@ export class GpioService implements OnModuleInit, OnModuleDestroy {
     // set the door switch for input
     this.rpio.open(this.doorSensorPin, this.rpio.INPUT, this.rpio.PULL_UP);
     // @TODO set up pins for output here
+
+    await this.initializePipes();
   }
 
   onModuleDestroy() {
@@ -97,20 +102,41 @@ export class GpioService implements OnModuleInit, OnModuleDestroy {
     );
   }
 
+  // @TODO make this private
+  async mkfifo(name: string): Promise<void> {
+    return new Promise((resolve) => {
+      const pipe = spawn('mkfifo', [name]);
+      pipe.on('exit', () => {
+        resolve();
+      });
+    });
+  }
+
+  // @TODO make this private
+  async initializePipes(): Promise<void> {
+    // open the OUTPUT read stream
+    await this.mkfifo(OUTPUT_PIPE);
+    const outputFd = this.fileSystem.openSync(OUTPUT_PIPE, 'r+');
+    this.outputStream = this.fileSystem.createReadStream(null, {
+      fd: outputFd,
+    });
+
+    // open the INPUT write stream
+    this.inputStream = this.fileSystem.createWriteStream(INPUT_PIPE);
+  }
+
+  // @TODO make this private
   async readFromOutputStream(): Promise<boolean> {
     return new Promise((resolve, reject) => {
       const timeoutHandle = setTimeout(() => {
         reject(new Error('request timed out'));
       }, TIMEOUT);
 
-      this.outputStream.addEventListener(
-        'data',
-        (data) => {
-          clearTimeout(timeoutHandle);
-          resolve(data);
-        },
-        { once: true },
-      );
+      this.outputStream.once('data', (data) => {
+        clearTimeout(timeoutHandle);
+        const result = JSON.parse(data.toString());
+        resolve(result);
+      });
     });
   }
 
