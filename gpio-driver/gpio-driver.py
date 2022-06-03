@@ -1,4 +1,4 @@
-import pifacedigitalio
+# import pifacedigitalio
 import time
 import os
 import select
@@ -18,7 +18,7 @@ DOOR_SWITCH_INPUT = 0
 DOOR_REMOTE_RELAY = 0
 LIGHT_RELAY = 1
 
-piface = pifacedigitalio.PiFaceDigital()
+# piface = pifacedigitalio.PiFaceDigital()
 
 def querySwitch(number):
   return False
@@ -28,7 +28,7 @@ def setOutput(number, state):
   if state:
     print("setting output on", number)
     # piface.output_pins[number].turn_on()
-  else
+  else:
     print("setting output off", number)
     # piface.output_pins[number].turn_off()
 
@@ -36,7 +36,7 @@ def setRelay(number, state):
   if state:
     print("setting relay on", number)
     # piface.relays[number].turn_on()
-  else
+  else:
     print("setting relay off", number)
     # piface.relays[number].turn_off()
 
@@ -78,6 +78,7 @@ if __name__ == "__main__":
           #
           if (inputPipe, select.POLLIN) in poll.poll(100):
             msg = getMessage(inputPipe)
+            print("got message", msg)
             msg = handleIncomingMessage(msg)
             print("received", msg)
             os.write(outputPipe, msg)
