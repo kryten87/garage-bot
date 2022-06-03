@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { ConfigService } from '@nestjs/config';
-import { GpioService } from './gpio';
+import { GpioService, INPUT_PIPE, OUTPUT_PIPE } from './gpio';
 import { Test, TestingModule } from '@nestjs/testing';
 
 const pause = (duration: number): Promise<void> =>
@@ -23,20 +23,33 @@ describe('Gpio', () => {
     read: jest.fn(),
   };
 
+  const mockFs = {
+    openSync: jest.fn(),
+    createReadStream: jest.fn(),
+    createWriteStream: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GpioService,
         { provide: ConfigService, useValue: mockConfig },
         { provide: 'RPIO', useValue: mockRpio },
+        { provide: 'FILESYSTEM', useValue: mockFs },
       ],
     }).compile();
 
     provider = module.get<GpioService>(GpioService);
 
+    provider.mkfifo = jest.fn();
+
     mockRpio.open.mockClear();
     mockRpio.init.mockClear();
     mockRpio.read.mockClear();
+
+    mockFs.openSync.mockClear();
+    mockFs.createReadStream.mockClear();
+    mockFs.createWriteStream.mockClear();
   });
 
   afterEach(() => {
@@ -145,7 +158,8 @@ describe('Gpio', () => {
     beforeEach(() => {
       // @ts-ignore private property; ok for testing
       provider.outputStream = {
-        addEventListener: jest.fn((event, handler) => {
+        // @ts-ignore mock event registration function; ok for testing
+        once: jest.fn((event, handler) => {
           listener = handler;
         }),
       };
@@ -154,7 +168,7 @@ describe('Gpio', () => {
     it('should add an event listener', async () => {
       const resultPromise = provider.readFromOutputStream();
       // @ts-ignore private property; ok for testing
-      expect(provider.outputStream.addEventListener.mock.calls.length).toBe(1);
+      expect(provider.outputStream.once.mock.calls.length).toBe(1);
       listener(true);
       await resultPromise;
     });
@@ -180,6 +194,8 @@ describe('Gpio', () => {
   describe('request', () => {
     beforeEach(() => {
       // @ts-ignore private property; ok for testing
+      provider.pipesAreInitialized = true;
+      // @ts-ignore private property; ok for testing
       provider.inputStream = { write: jest.fn() };
       provider.readFromOutputStream = jest.fn();
     });
@@ -201,6 +217,24 @@ describe('Gpio', () => {
       await provider.request(query);
       // @ts-ignore method overwritten by mock; ok for testing
       expect(provider.readFromOutputStream.mock.calls.length).toBe(1);
+    });
+  });
+
+  describe('initializePipes', () => {
+    it('should correctly initialize OUTPUT stream', async () => {
+      await provider.initializePipes();
+
+      expect(mockFs.openSync.mock.calls.length).toBe(1);
+      expect(mockFs.openSync.mock.calls[0][0]).toBe(OUTPUT_PIPE);
+      expect(mockFs.openSync.mock.calls[0][1]).toBe('r+');
+      expect(mockFs.createReadStream.mock.calls.length).toBe(1);
+    });
+
+    it('should correctly initialize INPUT stream', async () => {
+      await provider.initializePipes();
+
+      expect(mockFs.createWriteStream.mock.calls.length).toBe(1);
+      expect(mockFs.createWriteStream.mock.calls[0][0]).toBe(INPUT_PIPE);
     });
   });
 });
