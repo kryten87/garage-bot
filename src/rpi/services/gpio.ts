@@ -69,17 +69,18 @@ export class GpioService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-  getCurrentDoorState() {
-    return this.rpio.read(this.doorSensorPin) ? 1 : 0;
+  async getCurrentDoorState() {
+    const result = await this.request({ input: this.doorSensorPin });
+    return result ? 1 : 0;
   }
 
   onDoorEvent(handler: any) {
     this.doorEventHandler.push(handler);
   }
 
-  private pollDoor() {
+  private async pollDoor() {
     // get the current state & add it to the list
-    this.inputState[this.doorSensorPin].push(this.getCurrentDoorState());
+    this.inputState[this.doorSensorPin].push(await this.getCurrentDoorState());
 
     if (this.inputState[this.doorSensorPin].length > 3) {
       this.inputState[this.doorSensorPin].shift();
