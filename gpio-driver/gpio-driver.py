@@ -1,7 +1,11 @@
-# import pifacedigitalio
 import os
 import select
 import json
+
+try:
+  import pifacedigitalio
+except ImportError:
+  pifacedigitalio = False
 
 # the number of seconds to press the button the garage remote
 # @TODO figure out how long to delay to trigger the remote
@@ -18,34 +22,33 @@ DOOR_SWITCH_INPUT = 0
 DOOR_REMOTE_RELAY = 0
 LIGHT_RELAY = 1
 
-# piface = pifacedigitalio.PiFaceDigital()
+piface = pifacedigitalio.PiFaceDigital() if pifacedigitalio != False else False
 
 def log(message):
-  print f'[GPIO Driver] {message}'
+  print(f'[GPIO Driver] {message}')
 
 def querySwitch(number):
   log(f'querying input {number}')
-  return False
-  # return piface.switches[number].value
+  return piface.switches[number].value if pifacedigitalio != False else False
 
 def setOutput(number, state):
   log(f'setting output {number} to {state}')
   if state:
-    print("setting output on", number)
-    # piface.output_pins[number].turn_on()
+    if pifacedigitalio:
+      piface.output_pins[number].turn_on()
   else:
-    print("setting output off", number)
-    # piface.output_pins[number].turn_off()
+    if pifacedigitalio:
+      piface.output_pins[number].turn_off()
   return True;
 
 def setRelay(number, state):
   log(f'setting relay {number} to {state}')
   if state:
-    print("setting relay on", number)
-    # piface.relays[number].turn_on()
+    if pifacedigitalio:
+      piface.relays[number].turn_on()
   else:
-    print("setting relay off", number)
-    # piface.relays[number].turn_off()
+    if pifacedigitalio:
+      piface.relays[number].turn_off()
   return True;
 
 def createPipe(pipeName, flags):
