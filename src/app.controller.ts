@@ -45,7 +45,7 @@ export class AppController {
     const results = [
       await this.gpioService.request({ input: 1 }),
       await this.gpioService.request({ output: { 1: true } }),
-      await this.gpioService.request({ relay: { 1: true } }),
+      await this.gpioService.request({ relay: { 1: false } }),
     ];
     return `<pre>${JSON.stringify(results, null, 2)}</pre>`;
   }
