@@ -6,6 +6,13 @@ import {
   OnModuleInit,
 } from '@nestjs/common';
 
+// INPUT to Python driver -- so we send commands on the input pipe; listen for
+// responses on the output pipe
+export const INPUT_PIPE = 'gpio_driver_input';
+export const OUTPUT_PIPE = 'gpio_driver_output';
+
+export const TIMEOUT = 1000;
+
 @Injectable()
 export class GpioService implements OnModuleInit, OnModuleDestroy {
   private pollingInterval: number;
@@ -15,10 +22,15 @@ export class GpioService implements OnModuleInit, OnModuleDestroy {
   private currentState: { [pin: number]: number } = {};
   private inputState: { [pin: number]: number[] } = {};
 
+  // @TODO make these private
+  public inputStream: any;
+  public outputStream: any;
+
   constructor(
     private readonly configService: ConfigService,
     @Inject('RPIO') private readonly rpio: any,
   ) {
+    // initialize the RPIO package
     this.rpio.init();
 
     // initialize the service state
@@ -79,5 +91,31 @@ export class GpioService implements OnModuleInit, OnModuleDestroy {
       () => this.pollDoor.call(this),
       this.pollingInterval,
     );
+  }
+
+  async readFromOutputStream(): Promise<any> {
+    return new Promise((resolve, reject) => {
+      const timeoutHandle = setTimeout(() => {
+        reject(new Error('request timed out'));
+      }, TIMEOUT);
+
+      this.outputStream.addEventListener(
+        'data',
+        (data) => {
+          clearTimeout(timeoutHandle);
+          resolve(data);
+        },
+        { once: true },
+      );
+    });
+  }
+
+  // @TODO add query interface
+  async request(query: any): Promise<any> {
+    // send the request to the INPUT pipe
+    await this.inputStream.write(JSON.stringify(query));
+
+    // wait for a response on the OUTPUT pipe
+    return this.readFromOutputStream();
   }
 }
