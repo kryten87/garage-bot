@@ -13,6 +13,12 @@ export const OUTPUT_PIPE = 'gpio_driver_output';
 
 export const TIMEOUT = 1000;
 
+interface PythonDriverQuery {
+  input?: number;
+  output?: { [pin: number]: boolean };
+  relay?: { [pin: number]: boolean };
+}
+
 @Injectable()
 export class GpioService implements OnModuleInit, OnModuleDestroy {
   private pollingInterval: number;
@@ -21,10 +27,8 @@ export class GpioService implements OnModuleInit, OnModuleDestroy {
   private doorEventHandler: any[] = [];
   private currentState: { [pin: number]: number } = {};
   private inputState: { [pin: number]: number[] } = {};
-
-  // @TODO make these private
-  public inputStream: any;
-  public outputStream: any;
+  private inputStream: any;
+  private outputStream: any;
 
   constructor(
     private readonly configService: ConfigService,
@@ -93,7 +97,7 @@ export class GpioService implements OnModuleInit, OnModuleDestroy {
     );
   }
 
-  async readFromOutputStream(): Promise<any> {
+  async readFromOutputStream(): Promise<boolean> {
     return new Promise((resolve, reject) => {
       const timeoutHandle = setTimeout(() => {
         reject(new Error('request timed out'));
@@ -110,11 +114,9 @@ export class GpioService implements OnModuleInit, OnModuleDestroy {
     });
   }
 
-  // @TODO add query interface
-  async request(query: any): Promise<any> {
+  async request(query: PythonDriverQuery): Promise<boolean> {
     // send the request to the INPUT pipe
     await this.inputStream.write(JSON.stringify(query));
-
     // wait for a response on the OUTPUT pipe
     return this.readFromOutputStream();
   }
