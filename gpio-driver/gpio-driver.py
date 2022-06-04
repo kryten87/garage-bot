@@ -107,11 +107,11 @@ if __name__ == "__main__":
             elif "output" in value:
               pin = list(value["output"].keys())[0]
               state = value["output"][pin]
-              result = setOutput(pin, state)
+              result = setOutput(int(pin), state)
             elif "relay" in value:
               relay = list(value["relay"].keys())[0]
               state = value["relay"][relay]
-              result = setRelay(relay, state)
+              result = setRelay(int(relay), state)
 
             # write the response to the pipe
             #
