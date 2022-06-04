@@ -51,19 +51,14 @@ export class GpioService implements OnModuleInit, OnModuleDestroy {
     this.doorSensorPin = this.configService.get<number>('GPIO_DOOR_SENSOR');
     this.currentState[this.doorSensorPin] = 0;
     this.inputState[this.doorSensorPin] = [0, 0, 0];
-
-    // start polling
-    log('starting polling');
-    this.timeHandle = setTimeout(
-      () => this.pollDoor.call(this),
-      this.pollingInterval,
-    );
   }
 
   async onModuleInit() {
     log('onModuleInit');
     // initialize the pipes for communication
     await this.initializePipes();
+
+    this.startPolling();
   }
 
   onModuleDestroy() {
@@ -71,6 +66,16 @@ export class GpioService implements OnModuleInit, OnModuleDestroy {
     if (this.timeHandle) {
       clearTimeout(this.timeHandle);
     }
+  }
+
+  // @TODO make this private
+  startPolling() {
+    // start polling
+    log('starting polling');
+    this.timeHandle = setTimeout(
+      () => this.pollDoor.call(this),
+      this.pollingInterval,
+    );
   }
 
   async getCurrentDoorState() {

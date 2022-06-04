@@ -85,6 +85,8 @@ describe('Gpio', () => {
       // @ts-ignore checking private property; ok for testing
       expect(provider.inputState[doorPin]).toEqual([0, 0, 0]);
 
+      provider.startPolling();
+
       // read = 0
       // @ts-ignore mocked method for testing
       provider.getCurrentDoorState.mockResolvedValueOnce(0);
