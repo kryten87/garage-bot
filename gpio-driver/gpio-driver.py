@@ -103,7 +103,7 @@ if __name__ == "__main__":
             #
             result = False
             if "input" in value:
-              result = querySwitch(value["input"])
+              result = querySwitch(int(value["input"]))
             elif "output" in value:
               pin = list(value["output"].keys())[0]
               state = value["output"][pin]
