@@ -15,6 +15,9 @@ const log = (message) => {
   console.log(`[gpio] ${message}`);
 };
 
+const pause = (duration) =>
+  new Promise((resolve) => setTimeout(resolve, duration));
+
 // INPUT to Python driver -- so we send commands on the input pipe; listen for
 // responses on the output pipe
 export const INPUT_PIPE = '/tmp/gpio_driver_input';
@@ -34,6 +37,8 @@ export class GpioService implements OnModuleInit, OnModuleDestroy {
   private timeHandle: NodeJS.Timeout;
   private doorSensorPin: number;
   private doorEventHandler: any[] = [];
+  private remoteRelay: number;
+  private remoteButtonPressLength: number;
   private currentState: { [pin: number]: number } = {};
   private inputState: { [pin: number]: number[] } = {};
   private inputStream: WriteStream;
@@ -49,6 +54,10 @@ export class GpioService implements OnModuleInit, OnModuleDestroy {
       'SENSOR_POLLING_INTERVAL',
     );
     this.doorSensorPin = this.configService.get<number>('GPIO_DOOR_SENSOR');
+    this.remoteRelay = this.configService.get<number>('GPIO_REMOTE_RELAY');
+    this.remoteButtonPressLength = this.configService.get<number>(
+      'REMOTE_BUTTON_PRESS_LENGTH',
+    );
     this.currentState[this.doorSensorPin] = 0;
     this.inputState[this.doorSensorPin] = [0, 0, 0];
   }
@@ -82,6 +91,15 @@ export class GpioService implements OnModuleInit, OnModuleDestroy {
     const result = await this.request({ input: this.doorSensorPin });
     log(`got current door state ${result}`);
     return result ? 1 : 0;
+  }
+
+  async pressRemoteButton() {
+    // relay 0 on
+    this.request({ relay: { [this.remoteRelay]: true } });
+    // pause long enough for the button press to register
+    await pause(this.remoteButtonPressLength);
+    // relay 0 off
+    this.request({ relay: { [this.remoteRelay]: false } });
   }
 
   onDoorEvent(handler: any) {
