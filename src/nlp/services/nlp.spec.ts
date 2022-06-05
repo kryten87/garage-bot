@@ -25,5 +25,17 @@ describe('Nlp', () => {
       expect(response.score).toBe(1);
       expect(response.answer).not.toBeUndefined();
     });
+
+    it('should give the expected values for important commands', async () => {
+      [
+        ['open', Intent.OpenDoor],
+        ['close', Intent.CloseDoor],
+        ['status', Intent.QueryState],
+      ].forEach(async ([text, intent]) => {
+        const response = await provider.process(text);
+        expect(response.intent).toBe(intent);
+        expect(response.score).toBeGreaterThanOrEqual(0.9);
+      });
+    });
   });
 });
