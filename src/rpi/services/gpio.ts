@@ -8,13 +8,6 @@ import {
 import { ReadStream, WriteStream } from 'fs';
 import { spawn } from 'child_process';
 
-const log = (message) => {
-  if (process.env.NODE_ENV === 'test') {
-    return;
-  }
-  console.log(`[gpio] ${message}`);
-};
-
 const pause = (duration) =>
   new Promise((resolve) => setTimeout(resolve, duration));
 
@@ -49,7 +42,6 @@ export class GpioService implements OnModuleInit, OnModuleDestroy {
     @Inject('FILESYSTEM') private readonly fileSystem: any,
   ) {
     // initialize the service state
-    log('initializing service state');
     this.pollingInterval = +this.configService.get<number>(
       'SENSOR_POLLING_INTERVAL',
     );
@@ -63,7 +55,6 @@ export class GpioService implements OnModuleInit, OnModuleDestroy {
   }
 
   async onModuleInit() {
-    log('onModuleInit');
     // initialize the pipes for communication
     await this.initializePipes();
 
@@ -71,7 +62,6 @@ export class GpioService implements OnModuleInit, OnModuleDestroy {
   }
 
   onModuleDestroy() {
-    log('onModuleDestroy');
     if (this.timeHandle) {
       clearTimeout(this.timeHandle);
     }
@@ -80,7 +70,6 @@ export class GpioService implements OnModuleInit, OnModuleDestroy {
   // @TODO make this private
   startPolling() {
     // start polling
-    log('starting polling');
     this.timeHandle = setTimeout(
       () => this.pollDoor.call(this),
       this.pollingInterval,
@@ -89,7 +78,6 @@ export class GpioService implements OnModuleInit, OnModuleDestroy {
 
   async getCurrentDoorState() {
     const result = await this.request({ input: this.doorSensorPin });
-    log(`got current door state ${result}`);
     return result ? 1 : 0;
   }
 
@@ -103,7 +91,6 @@ export class GpioService implements OnModuleInit, OnModuleDestroy {
   }
 
   onDoorEvent(handler: any) {
-    log('adding door event handler');
     this.doorEventHandler.push(handler);
   }
 
@@ -134,11 +121,9 @@ export class GpioService implements OnModuleInit, OnModuleDestroy {
 
   // @TODO make this private
   async mkfifo(name: string): Promise<void> {
-    log(`making fifo pipe ${name}`);
     return new Promise((resolve) => {
       const pipe = spawn('mkfifo', [name]);
       pipe.on('exit', () => {
-        log(`fifo pipe ${name} created`);
         resolve();
       });
     });
@@ -146,7 +131,6 @@ export class GpioService implements OnModuleInit, OnModuleDestroy {
 
   // @TODO make this private
   async initializePipes(): Promise<void> {
-    log('initializing pipes');
     // open the OUTPUT read stream
     await this.mkfifo(OUTPUT_PIPE);
     const outputFd = this.fileSystem.openSync(OUTPUT_PIPE, 'r+');
@@ -174,7 +158,6 @@ export class GpioService implements OnModuleInit, OnModuleDestroy {
   }
 
   async request(query: PythonDriverQuery): Promise<boolean> {
-    log(`making request ${JSON.stringify(query)}`);
     // send the request to the INPUT pipe
     await this.inputStream.write(JSON.stringify(query));
     // wait for a response on the OUTPUT pipe
