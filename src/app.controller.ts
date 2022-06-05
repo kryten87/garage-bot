@@ -42,12 +42,17 @@ export class AppController {
 
   @Get('gpio')
   async testGpio(): Promise<string> {
-    const results = [
-      await this.gpioService.request({ input: 1 }),
-      await this.gpioService.request({ output: { 1: true } }),
-      await this.gpioService.request({ relay: { 1: false } }),
-    ];
-    return `<pre>${JSON.stringify(results, null, 2)}</pre>`;
+    const pause = (duration) =>
+      new Promise((resolve) => setTimeout(resolve, duration));
+    // relay 0 on
+    this.gpioService.request({ relay: { 0: true } });
+    // wait 1/2 second
+    // @TODO make this configurable
+
+    await pause(2000);
+    // relay 0 off
+    this.gpioService.request({ relay: { 0: false } });
+    return 'done!';
   }
 
   messageHandler = async ({ message }): Promise<void> => {
