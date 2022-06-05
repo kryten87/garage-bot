@@ -29,7 +29,6 @@ def log(message):
 
 def querySwitch(number):
   result = piface.switches[number].value if pifacedigitalio != False else False
-  log(f'querying input {number} - result = {result}')
   return result
 
 def setOutput(number, state):
@@ -58,7 +57,6 @@ def createPipe(pipeName, flags):
   return os.open(pipeName,flags)
 
 def getMessage(pipe):
-  log("getting message from pipe")
   return os.read(pipe, 20 * 1024);
 
 if __name__ == "__main__":
