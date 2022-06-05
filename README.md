@@ -39,6 +39,8 @@ The brains of the bot. Processes input from Slack and outputs the resulting acti
 ✅ 0.8.0 - add help text
 ✅ 1.0.0 - initial release
 1.1.0 - Python PiFace Digital 2 to interface with relays & IO + garage open/close
+  - change open/close/status commands
+  - add trigger remote command to gpio service
 1.2.0 - improve python driver tests
 1.3.0 - end-to-end tests
 1.4.0 - deployment (automated?)
