@@ -10,11 +10,25 @@ describe('Gpio', () => {
   let provider: GpioService;
 
   const doorPin = 0;
+  const remoteButtonRelay = 1;
+  const remoteButtonPressLength = 10;
   const pollingInterval = 100;
 
   const mockConfig = {
-    get: (key: string): string | number =>
-      key === 'GPIO_DOOR_SENSOR' ? doorPin : pollingInterval,
+    get: (key: string): string | number => {
+      switch (key) {
+        case 'GPIO_DOOR_SENSOR':
+          return doorPin;
+        case 'GPIO_REMOTE_RELAY':
+          return remoteButtonRelay;
+        case 'REMOTE_BUTTON_PRESS_LENGTH':
+          return remoteButtonPressLength;
+        case 'SENSOR_POLLING_INTERVAL':
+          return pollingInterval;
+        default:
+          throw new Error(`unexpected config key requested: "${key}"`);
+      }
+    },
   };
 
   const mockRpio = {
@@ -259,6 +273,23 @@ describe('Gpio', () => {
       expect(provider.request.mock.calls.length).toBe(1);
       // @ts-ignore mocked method; ok for testing
       expect(provider.request.mock.calls[0][0]).toEqual({ input: doorPin });
+    });
+  });
+
+  describe('pressRemoteButton', () => {
+    it('should make a request to the driver with the correct parameters', async () => {
+      provider.request = jest.fn();
+      await provider.pressRemoteButton();
+      // @ts-ignore mocked method; ok for testing
+      expect(provider.request.mock.calls.length).toBe(2);
+      // @ts-ignore mocked method; ok for testing
+      expect(provider.request.mock.calls[0][0]).toEqual({
+        relay: { [remoteButtonRelay]: true },
+      });
+      // @ts-ignore mocked method; ok for testing
+      expect(provider.request.mock.calls[1][0]).toEqual({
+        relay: { [remoteButtonRelay]: false },
+      });
     });
   });
 });
