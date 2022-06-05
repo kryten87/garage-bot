@@ -45,10 +45,11 @@ The brains of the bot. Processes input from Slack and outputs the resulting acti
   - update open & close commands to use remote
   - test script
   - update deploy script
-1.2.0 - improve python driver tests
-1.3.0 - light?
-1.4.0 - end-to-end tests
-1.5.0 - deployment (automated?)
+1.2.0 - add two-step open/close
+1.3.0 - improve python driver tests
+1.4.0 - light?
+1.5.0 - end-to-end tests
+1.6.0 - deployment (automated?)
 
 #### Notes
 
