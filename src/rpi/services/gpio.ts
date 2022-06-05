@@ -8,12 +8,12 @@ import {
 import { ReadStream, WriteStream } from 'fs';
 import { spawn } from 'child_process';
 
-const log = message => {
+const log = (message) => {
   if (process.env.NODE_ENV === 'test') {
     return;
   }
   console.log(`[gpio] ${message}`);
-}
+};
 
 // INPUT to Python driver -- so we send commands on the input pipe; listen for
 // responses on the output pipe
