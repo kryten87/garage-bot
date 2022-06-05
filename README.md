@@ -39,7 +39,7 @@ The brains of the bot. Processes input from Slack and outputs the resulting acti
 ✅ 0.8.0 - add help text
 ✅ 1.0.0 - initial release
 1.1.0 - Python PiFace Digital 2 to interface with relays & IO + garage open/close
-  - change open/close/status commands
+  - ✅ change open/close/status commands
   - add trigger remote command to gpio service
   - configuration: remote button press length, remote button relay, light relay
 1.2.0 - improve python driver tests
