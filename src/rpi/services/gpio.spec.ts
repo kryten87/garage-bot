@@ -9,7 +9,7 @@ const pause = (duration: number): Promise<void> =>
 describe('Gpio', () => {
   let provider: GpioService;
 
-  const doorPin = 17;
+  const doorPin = 0;
   const pollingInterval = 100;
 
   const mockConfig = {
@@ -248,6 +248,17 @@ describe('Gpio', () => {
 
       expect(mockFs.createWriteStream.mock.calls.length).toBe(1);
       expect(mockFs.createWriteStream.mock.calls[0][0]).toBe(INPUT_PIPE);
+    });
+  });
+
+  describe('getCurrentDoorState', () => {
+    it('should make a request to the driver with the correct parameters', async () => {
+      provider.request = jest.fn();
+      await provider.getCurrentDoorState();
+      // @ts-ignore mocked method; ok for testing
+      expect(provider.request.mock.calls.length).toBe(1);
+      // @ts-ignore mocked method; ok for testing
+      expect(provider.request.mock.calls[0][0]).toEqual({ input: doorPin });
     });
   });
 });
