@@ -53,6 +53,8 @@ The brains of the bot. Processes input from Slack and outputs the resulting acti
 
 #### Notes
 
+Service files go in `/usr/lib/systemd/system`
+
 **Switch to Raspberry Pi A+**
 
 This is an older model. Need to see if we can get it running on that hardware using the Piface Digital 2.
