@@ -24,11 +24,16 @@ LIGHT_RELAY = 1
 
 piface = pifacedigitalio.PiFaceDigital() if pifacedigitalio != False else False
 
+def log(message):
+  print(f'[GPIO Driver] {message}')
+
 def querySwitch(number):
   result = piface.switches[number].value if pifacedigitalio != False else False
+  log(f'querying input {number} - result = {result}')
   return result
 
 def setOutput(number, state):
+  log(f'setting output {number} to {state}')
   if state:
     if pifacedigitalio:
       piface.output_pins[number].turn_on()
@@ -38,6 +43,7 @@ def setOutput(number, state):
   return True;
 
 def setRelay(number, state):
+  log(f'setting relay {number} to {state}')
   if state:
     if pifacedigitalio:
       piface.relays[number].turn_on()
@@ -47,16 +53,20 @@ def setRelay(number, state):
   return True;
 
 def createPipe(pipeName, flags):
+  log(f'creating pipe {pipeName}')
   os.mkfifo(pipeName)
   return os.open(pipeName,flags)
 
 def getMessage(pipe):
+  log("getting message from pipe")
   return os.read(pipe, 20 * 1024);
 
 if __name__ == "__main__":
+  log("creating input pipe")
   inputPipe = createPipe(INPUT_PIPE, os.O_RDONLY | os.O_NONBLOCK)
 
   try:
+    log("waiting for output pipe to open")
     # loop until the output pipe shows up
     #
     while True:
@@ -67,6 +77,7 @@ if __name__ == "__main__":
         # wait for output pipe to get initialized
         pass
 
+    log("output pipe open; waiting for input")
     try:
       # intialize the poller
       #
