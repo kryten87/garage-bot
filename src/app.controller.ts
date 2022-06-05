@@ -70,14 +70,18 @@ export class AppController {
             : "I'm not sure what you mean. Are you just saying hi? Try asking for help if you need more info.";
         break;
       case Intent.OpenDoor:
-        // @TODO open the door
+        if (score > 0.9) {
+          await this.gpioService.pressRemoteButton();
+        }
         text =
           score > 0.8
             ? text
             : `I'm not sure what you mean. Are you asking me to open the door? Try asking for help if you need more info.`;
         break;
       case Intent.CloseDoor:
-        // @TODO close the door
+        if (score > 0.9) {
+          await this.gpioService.pressRemoteButton();
+        }
         text =
           score > 0.8
             ? text
