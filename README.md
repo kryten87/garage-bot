@@ -42,6 +42,7 @@ The brains of the bot. Processes input from Slack and outputs the resulting acti
   - ✅ change open/close/status commands
   - ✅ add trigger remote command to gpio service
   - ✅ configuration: remote button press length, remote button relay
+  - deploy and test changes
 1.2.0 - improve python driver tests
 1.3.0 - light?
 1.4.0 - end-to-end tests
