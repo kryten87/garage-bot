@@ -44,7 +44,7 @@ The brains of the bot. Processes input from Slack and outputs the resulting acti
   - ✅ configuration: remote button press length, remote button relay
   - ✅ update open & close commands to use remote
   - ✅ clean up logging
-  - test script
+  - ✅ test script
   - update deploy script
 1.2.0 - add two-step open/close
 1.3.0 - improve python driver tests
