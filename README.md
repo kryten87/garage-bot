@@ -112,10 +112,11 @@ Consider [ngrok](https://ngrok.com/) or [localtunnel](https://www.npmjs.com/pack
 
 ### Future
 
-- get version # from package.json
+- get version # from package.json & report at startup
 - history -- report when garage door opened/closed last
 - camera -- get a snapshot with the query results
 - add tests for slack logging
+- improved .env handling (cast to correct values)
 
 ## Installation
 
