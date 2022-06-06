@@ -46,9 +46,9 @@ The brains of the bot. Processes input from Slack and outputs the resulting acti
   - ✅ clean up logging
   - ✅ test script
   - ✅ update deploy script
-1.2.0 - add two-step open/close
-1.3.0 - improve python driver tests
-1.4.0 - light?
+1.2.0 - improve python driver tests/clean up pipe initialization
+1.3.0 - add two-step open/close
+1.4.0 - light? camera?
 1.5.0 - end-to-end tests
 1.6.0 - deployment (automated?)
 
