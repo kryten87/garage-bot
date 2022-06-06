@@ -55,8 +55,6 @@ describe('Gpio', () => {
 
     provider = module.get<GpioService>(GpioService);
 
-    provider.mkfifo = jest.fn();
-
     mockRpio.open.mockClear();
     mockRpio.init.mockClear();
     mockRpio.read.mockClear();
