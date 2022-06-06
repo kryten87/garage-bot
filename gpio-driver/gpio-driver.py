@@ -28,7 +28,7 @@ def log(message):
   print(f'[GPIO Driver] {message}')
 
 def querySwitch(number):
-  result = piface.switches[number].value if pifacedigitalio != False else False
+  result = not piface.switches[number].value if pifacedigitalio != False else False
   return result
 
 def setOutput(number, state):
