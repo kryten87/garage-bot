@@ -62,7 +62,7 @@ sudo systemctl stop gpio-driver
 sleep 10s
 
 echo "[deployment] removing pipes"
-rm /tmp/gpio_driver_*
+rm -rf /tmp/gpio_driver_*
 
 echo "[deployment] replace homebot service"
 if [ -e "/home/dave/$APP_DIR" ]; then
@@ -76,7 +76,9 @@ if [ -e "/home/dave/$DRIVER_DIR" ]; then
 fi
 mv "/home/dave/$DRIVER_STAGING_DIR" "/home/dave/$DRIVER_DIR"
 
-echo "[deployment] start service"
+echo "[deployment] start services"
+sudo systemctl start gpio-driver
+sleep 2s
 sudo systemctl start homebot
 
 echo "[deployment] final clean up"
