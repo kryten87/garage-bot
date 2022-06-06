@@ -47,6 +47,7 @@ The brains of the bot. Processes input from Slack and outputs the resulting acti
   - ✅ test script
   - ✅ update deploy script
 ✅ 1.2.0 - add DISABLE_SLACK flag to env
+1.2.1 - correct DISABLE_SLACK flag cast to boolean
 1.3.0 - improve python driver tests/clean up pipe initialization
 1.4.0 - add two-step open/close
 1.5.0 - light? camera?
@@ -111,10 +112,11 @@ Consider [ngrok](https://ngrok.com/) or [localtunnel](https://www.npmjs.com/pack
 
 ### Future
 
-- get version # from package.json
+- get version # from package.json & report at startup
 - history -- report when garage door opened/closed last
 - camera -- get a snapshot with the query results
 - add tests for slack logging
+- improved .env handling (cast to correct values)
 
 ## Installation
 

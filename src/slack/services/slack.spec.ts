@@ -10,7 +10,7 @@ describe('Slack', () => {
 
   beforeEach(async () => {
     mockConfigService = {
-      get: jest.fn().mockReturnValue(false),
+      get: jest.fn().mockReturnValue('0'),
     };
 
     mockBoltApp = {
@@ -107,7 +107,7 @@ describe('Slack', () => {
 
     describe('DISABLE_SLACK', () => {
       it('should not contact slack if DISABLE_SLACK is true (users)', async () => {
-        mockConfigService.get.mockReturnValue(true);
+        mockConfigService.get.mockReturnValue('1');
         const text = `hello from ${Date.now()}`;
         await provider.sendText({ users: ['@Thor'], text });
 
@@ -118,7 +118,7 @@ describe('Slack', () => {
       });
 
       it('should not contact slack if DISABLE_SLACK is true (channels)', async () => {
-        mockConfigService.get.mockReturnValue(true);
+        mockConfigService.get.mockReturnValue('true');
         const text = `hello from ${Date.now()}`;
         await provider.sendText({ channel: '#my-channel', text });
 
