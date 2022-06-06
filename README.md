@@ -38,7 +38,7 @@ The brains of the bot. Processes input from Slack and outputs the resulting acti
 ✅ 0.7.1 - review logging
 ✅ 0.8.0 - add help text
 ✅ 1.0.0 - initial release
-1.1.0 - Python PiFace Digital 2 to interface with relays & IO + garage open/close
+✅ 1.1.0 - Python PiFace Digital 2 to interface with relays & IO + garage open/close
   - ✅ change open/close/status commands
   - ✅ add trigger remote command to gpio service
   - ✅ configuration: remote button press length, remote button relay
@@ -46,11 +46,12 @@ The brains of the bot. Processes input from Slack and outputs the resulting acti
   - ✅ clean up logging
   - ✅ test script
   - ✅ update deploy script
-1.2.0 - add two-step open/close
-1.3.0 - improve python driver tests
-1.4.0 - light?
-1.5.0 - end-to-end tests
-1.6.0 - deployment (automated?)
+✅ 1.2.0 - add DISABLE_SLACK flag to env
+1.3.0 - improve python driver tests/clean up pipe initialization
+1.4.0 - add two-step open/close
+1.5.0 - light? camera?
+1.6.0 - end-to-end tests
+1.7.0 - deployment (automated?)
 
 #### Notes
 

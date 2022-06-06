@@ -16,6 +16,7 @@ const pause = (duration) =>
 export const INPUT_PIPE = '/tmp/gpio_driver_input';
 export const OUTPUT_PIPE = '/tmp/gpio_driver_output';
 
+// @TODO rename this & make it an env variable
 export const TIMEOUT = 1000;
 
 interface PythonDriverQuery {
