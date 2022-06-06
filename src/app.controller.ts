@@ -40,6 +40,21 @@ export class AppController {
     return this.appService.getHello();
   }
 
+  @Get('gpio')
+  async testGpio(): Promise<string> {
+    const pause = (duration) =>
+      new Promise((resolve) => setTimeout(resolve, duration));
+    // relay 0 on
+    this.gpioService.request({ relay: { 0: true } });
+    // wait 1/2 second
+    // @TODO make this configurable
+
+    await pause(2000);
+    // relay 0 off
+    this.gpioService.request({ relay: { 0: false } });
+    return 'done!';
+  }
+
   messageHandler = async ({ message }): Promise<void> => {
     const { channel } = message;
     const { intent, score, answer } = await this.nlpService.process(
@@ -55,14 +70,18 @@ export class AppController {
             : "I'm not sure what you mean. Are you just saying hi? Try asking for help if you need more info.";
         break;
       case Intent.OpenDoor:
-        // @TODO open the door
+        if (score > 0.9) {
+          await this.gpioService.pressRemoteButton();
+        }
         text =
           score > 0.8
             ? text
             : `I'm not sure what you mean. Are you asking me to open the door? Try asking for help if you need more info.`;
         break;
       case Intent.CloseDoor:
-        // @TODO close the door
+        if (score > 0.9) {
+          await this.gpioService.pressRemoteButton();
+        }
         text =
           score > 0.8
             ? text

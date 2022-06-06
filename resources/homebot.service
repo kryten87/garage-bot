@@ -1,6 +1,7 @@
 [Unit]
 Description=Homebot - The garage door monitoring service
 After=network.target
+Requires=gpio-driver.service
 
 [Service]
 Type=simple

@@ -15,6 +15,7 @@ describe('AppController', () => {
   const mockGpioService = {
     onDoorEvent: jest.fn(),
     getCurrentDoorState: jest.fn().mockReturnValue(0),
+    pressRemoteButton: jest.fn(),
   };
 
   const mockNlpService = {
@@ -35,6 +36,8 @@ describe('AppController', () => {
     };
 
     mockGpioService.onDoorEvent.mockClear();
+    mockGpioService.getCurrentDoorState.mockClear();
+    mockGpioService.pressRemoteButton.mockClear();
     mockNlpService.process.mockClear();
     mockSlackService.onMessage.mockClear();
     mockSlackService.sendText.mockClear();
@@ -79,6 +82,8 @@ describe('AppController', () => {
 
       await appController.messageHandler(event);
 
+      expect(mockGpioService.pressRemoteButton.mock.calls.length).toBe(0);
+
       expect(mockNlpService.process.mock.calls.length).toBe(1);
       expect(mockNlpService.process.mock.calls[0][0]).toBe(event.message.text);
 
@@ -107,6 +112,8 @@ describe('AppController', () => {
 
       await appController.messageHandler(event);
 
+      expect(mockGpioService.pressRemoteButton.mock.calls.length).toBe(1);
+
       expect(mockNlpService.process.mock.calls.length).toBe(1);
       expect(mockNlpService.process.mock.calls[0][0]).toBe(event.message.text);
 
@@ -115,8 +122,6 @@ describe('AppController', () => {
         channel,
         text: answer,
       });
-
-      // @TODO add test for GPIO
     });
 
     it('should correctly respond to a CloseDoor message', async () => {
@@ -137,6 +142,8 @@ describe('AppController', () => {
 
       await appController.messageHandler(event);
 
+      expect(mockGpioService.pressRemoteButton.mock.calls.length).toBe(1);
+
       expect(mockNlpService.process.mock.calls.length).toBe(1);
       expect(mockNlpService.process.mock.calls[0][0]).toBe(event.message.text);
 
@@ -145,8 +152,6 @@ describe('AppController', () => {
         channel,
         text: answer,
       });
-
-      // @TODO add test for GPIO
     });
 
     it('should correctly respond to a QueryState message', async () => {
@@ -167,6 +172,8 @@ describe('AppController', () => {
 
       await appController.messageHandler(event);
 
+      expect(mockGpioService.pressRemoteButton.mock.calls.length).toBe(0);
+
       expect(mockNlpService.process.mock.calls.length).toBe(1);
       expect(mockNlpService.process.mock.calls[0][0]).toBe(event.message.text);
 
@@ -177,7 +184,7 @@ describe('AppController', () => {
       });
     });
 
-    it('should correctly handle a low-confidence message', async () => {
+    it('should correctly handle a low-confidence query message', async () => {
       const messageChannel = 'A123456';
       const intent = Intent.QueryState;
       const score = 0.1;
@@ -192,6 +199,8 @@ describe('AppController', () => {
       mockNlpService.process.mockResolvedValue({ intent, score });
 
       await appController.messageHandler(event);
+
+      expect(mockGpioService.pressRemoteButton.mock.calls.length).toBe(0);
 
       expect(mockSlackService.sendText.mock.calls.length).toBe(2);
 
@@ -215,6 +224,44 @@ describe('AppController', () => {
           score,
         }),
       );
+    });
+
+    it('should NOT open the door on a low-confidence open message', async () => {
+      const messageChannel = 'A123456';
+      const intent = Intent.OpenDoor;
+      const score = 0.1;
+
+      const event = {
+        message: {
+          channel: messageChannel,
+          text: 'open',
+        },
+      };
+
+      mockNlpService.process.mockResolvedValue({ intent, score });
+
+      await appController.messageHandler(event);
+
+      expect(mockGpioService.pressRemoteButton.mock.calls.length).toBe(0);
+    });
+
+    it('should NOT open the door on a low-confidence close message', async () => {
+      const messageChannel = 'A123456';
+      const intent = Intent.CloseDoor;
+      const score = 0.1;
+
+      const event = {
+        message: {
+          channel: messageChannel,
+          text: 'open',
+        },
+      };
+
+      mockNlpService.process.mockResolvedValue({ intent, score });
+
+      await appController.messageHandler(event);
+
+      expect(mockGpioService.pressRemoteButton.mock.calls.length).toBe(0);
     });
   });
 
