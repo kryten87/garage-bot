@@ -71,7 +71,11 @@ export class SlackService implements OnModuleInit {
       }
     }
 
-    if (this.configService.get<boolean>('DISABLE_SLACK')) {
+    const disableSlack =
+      this.configService.get<string>('DISABLE_SLACK') === '1' ||
+      this.configService.get<string>('DISABLE_SLACK').toLowerCase() === 'true';
+
+    if (disableSlack) {
       return;
     }
 
