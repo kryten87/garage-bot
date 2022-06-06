@@ -37,13 +37,24 @@ The brains of the bot. Processes input from Slack and outputs the resulting acti
 ✅ 0.7.0 - logging (to slack?)
 ✅ 0.7.1 - review logging
 ✅ 0.8.0 - add help text
-1.0.0 - initial release
-1.1.0 - Python PiFace Digital 2? To interface with relays & IO
-1.1.0 - add garage door open/close functionality
-1.2.0 - end-to-end tests
-1.3.0 - deployment (automated?)
+✅ 1.0.0 - initial release
+1.1.0 - Python PiFace Digital 2 to interface with relays & IO + garage open/close
+  - ✅ change open/close/status commands
+  - ✅ add trigger remote command to gpio service
+  - ✅ configuration: remote button press length, remote button relay
+  - ✅ update open & close commands to use remote
+  - ✅ clean up logging
+  - ✅ test script
+  - ✅ update deploy script
+1.2.0 - add two-step open/close
+1.3.0 - improve python driver tests
+1.4.0 - light?
+1.5.0 - end-to-end tests
+1.6.0 - deployment (automated?)
 
 #### Notes
+
+Service files go in `/usr/lib/systemd/system`
 
 **Switch to Raspberry Pi A+**
 
@@ -61,10 +72,11 @@ The PiFace is old and not particularly up to date. There is a NodeJS package, bu
 [Documentation](https://pifacedigitalio.readthedocs.io/pifacedigital.html)
 
 Plan: need new Python service that
-- listens for changes on GPIO input
-- listens for input from NodeJS app on named pipe to
-  - trigger relay to open/close
-  - trigger relay to turn on/off light for camera
+- provides a "dumb" wrapper over the PiFace digital API
+- send a query to the INPUT pipe and receive values from the OUTPUT pipe:
+  - to get an input value:  `{ input: <input #> }`; returns `true` (high) or `false` (low)
+  - to set an output value: `{ output: { <output #>: true | false } }` to set the output high/low; return `true` if no problems
+  - to turn on/off a relay: `{ relay: { <relay #>: true | false } }` to set the relay to `true` (open) or `false` (closed); return `true` if no problems
 
 Pseudocode:
 

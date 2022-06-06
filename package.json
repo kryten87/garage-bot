@@ -1,6 +1,6 @@
 {
   "name": "home-bot",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "",
   "author": "",
   "private": true,
@@ -29,7 +29,6 @@
     "node-nlp": "^4.24.0",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
-    "rpio": "^2.4.2",
     "rxjs": "^7.2.0"
   },
   "devDependencies": {

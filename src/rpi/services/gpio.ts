@@ -5,6 +5,24 @@ import {
   OnModuleDestroy,
   OnModuleInit,
 } from '@nestjs/common';
+import { ReadStream, WriteStream } from 'fs';
+import { spawn } from 'child_process';
+
+const pause = (duration) =>
+  new Promise((resolve) => setTimeout(resolve, duration));
+
+// INPUT to Python driver -- so we send commands on the input pipe; listen for
+// responses on the output pipe
+export const INPUT_PIPE = '/tmp/gpio_driver_input';
+export const OUTPUT_PIPE = '/tmp/gpio_driver_output';
+
+export const TIMEOUT = 1000;
+
+interface PythonDriverQuery {
+  input?: number;
+  output?: { [pin: number]: boolean };
+  relay?: { [pin: number]: boolean };
+}
 
 @Injectable()
 export class GpioService implements OnModuleInit, OnModuleDestroy {
@@ -12,34 +30,35 @@ export class GpioService implements OnModuleInit, OnModuleDestroy {
   private timeHandle: NodeJS.Timeout;
   private doorSensorPin: number;
   private doorEventHandler: any[] = [];
+  private remoteRelay: number;
+  private remoteButtonPressLength: number;
   private currentState: { [pin: number]: number } = {};
   private inputState: { [pin: number]: number[] } = {};
+  private inputStream: WriteStream;
+  private outputStream: ReadStream;
 
   constructor(
     private readonly configService: ConfigService,
-    @Inject('RPIO') private readonly rpio: any,
+    @Inject('FILESYSTEM') private readonly fileSystem: any,
   ) {
-    this.rpio.init();
-
     // initialize the service state
     this.pollingInterval = +this.configService.get<number>(
       'SENSOR_POLLING_INTERVAL',
     );
     this.doorSensorPin = this.configService.get<number>('GPIO_DOOR_SENSOR');
+    this.remoteRelay = this.configService.get<number>('GPIO_REMOTE_RELAY');
+    this.remoteButtonPressLength = this.configService.get<number>(
+      'REMOTE_BUTTON_PRESS_LENGTH',
+    );
     this.currentState[this.doorSensorPin] = 0;
     this.inputState[this.doorSensorPin] = [0, 0, 0];
-
-    // start polling
-    this.timeHandle = setTimeout(
-      () => this.pollDoor.call(this),
-      this.pollingInterval,
-    );
   }
 
   async onModuleInit() {
-    // set the door switch for input
-    this.rpio.open(this.doorSensorPin, this.rpio.INPUT, this.rpio.PULL_UP);
-    // @TODO set up pins for output here
+    // initialize the pipes for communication
+    await this.initializePipes();
+
+    this.startPolling();
   }
 
   onModuleDestroy() {
@@ -48,17 +67,36 @@ export class GpioService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-  getCurrentDoorState() {
-    return this.rpio.read(this.doorSensorPin) ? 1 : 0;
+  // @TODO make this private
+  startPolling() {
+    // start polling
+    this.timeHandle = setTimeout(
+      () => this.pollDoor.call(this),
+      this.pollingInterval,
+    );
+  }
+
+  async getCurrentDoorState() {
+    const result = await this.request({ input: this.doorSensorPin });
+    return result ? 1 : 0;
+  }
+
+  async pressRemoteButton() {
+    // relay 0 on
+    this.request({ relay: { [this.remoteRelay]: true } });
+    // pause long enough for the button press to register
+    await pause(this.remoteButtonPressLength);
+    // relay 0 off
+    this.request({ relay: { [this.remoteRelay]: false } });
   }
 
   onDoorEvent(handler: any) {
     this.doorEventHandler.push(handler);
   }
 
-  private pollDoor() {
+  private async pollDoor() {
     // get the current state & add it to the list
-    this.inputState[this.doorSensorPin].push(this.getCurrentDoorState());
+    this.inputState[this.doorSensorPin].push(await this.getCurrentDoorState());
 
     if (this.inputState[this.doorSensorPin].length > 3) {
       this.inputState[this.doorSensorPin].shift();
@@ -79,5 +117,50 @@ export class GpioService implements OnModuleInit, OnModuleDestroy {
       () => this.pollDoor.call(this),
       this.pollingInterval,
     );
+  }
+
+  // @TODO make this private
+  async mkfifo(name: string): Promise<void> {
+    return new Promise((resolve) => {
+      const pipe = spawn('mkfifo', [name]);
+      pipe.on('exit', () => {
+        resolve();
+      });
+    });
+  }
+
+  // @TODO make this private
+  async initializePipes(): Promise<void> {
+    // open the OUTPUT read stream
+    await this.mkfifo(OUTPUT_PIPE);
+    const outputFd = this.fileSystem.openSync(OUTPUT_PIPE, 'r+');
+    this.outputStream = this.fileSystem.createReadStream(null, {
+      fd: outputFd,
+    });
+
+    // open the INPUT write stream
+    this.inputStream = this.fileSystem.createWriteStream(INPUT_PIPE);
+  }
+
+  // @TODO make this private
+  async readFromOutputStream(): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      const timeoutHandle = setTimeout(() => {
+        reject(new Error('request timed out'));
+      }, TIMEOUT);
+
+      this.outputStream.once('data', (data) => {
+        clearTimeout(timeoutHandle);
+        const result = JSON.parse(data.toString());
+        resolve(result);
+      });
+    });
+  }
+
+  async request(query: PythonDriverQuery): Promise<boolean> {
+    // send the request to the INPUT pipe
+    await this.inputStream.write(JSON.stringify(query));
+    // wait for a response on the OUTPUT pipe
+    return this.readFromOutputStream();
   }
 }
