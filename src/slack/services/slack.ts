@@ -71,6 +71,10 @@ export class SlackService implements OnModuleInit {
       }
     }
 
+    if (this.configService.get<boolean>('DISABLE_SLACK')) {
+      return;
+    }
+
     users = (
       await Promise.all(
         await users.map((user) =>
