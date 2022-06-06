@@ -88,7 +88,7 @@ export class AppController {
             : "I'm not sure what you mean. Are you asking me to close the door? Try asking for help if you need more info.";
         break;
       case Intent.QueryState:
-        const currentState = this.gpioService.getCurrentDoorState();
+        const currentState = await this.gpioService.getCurrentDoorState();
         text =
           score > 0.8
             ? `The door is ${currentState ? 'open' : 'closed'}.`
