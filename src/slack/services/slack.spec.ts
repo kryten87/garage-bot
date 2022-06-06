@@ -5,13 +5,14 @@ import { Test, TestingModule } from '@nestjs/testing';
 describe('Slack', () => {
   let provider: SlackService;
 
-  const mockConfigService = {
-    get: jest.fn(),
-  };
-
+  let mockConfigService;
   let mockBoltApp;
 
   beforeEach(async () => {
+    mockConfigService = {
+      get: jest.fn().mockReturnValue(false),
+    };
+
     mockBoltApp = {
       start: jest.fn().mockResolvedValue(undefined),
       message: jest.fn(),
@@ -101,6 +102,30 @@ describe('Slack', () => {
       mockBoltApp.client.conversations.open.mockResolvedValue({
         ok: true,
         channel: { id: channelId },
+      });
+    });
+
+    describe('DISABLE_SLACK', () => {
+      it('should not contact slack if DISABLE_SLACK is true (users)', async () => {
+        mockConfigService.get.mockReturnValue(true);
+        const text = `hello from ${Date.now()}`;
+        await provider.sendText({ users: ['@Thor'], text });
+
+        expect(mockBoltApp.client.users.list.mock.calls.length).toBe(0);
+        expect(mockBoltApp.client.conversations.list.mock.calls.length).toBe(0);
+        expect(mockBoltApp.client.conversations.open.mock.calls.length).toBe(0);
+        expect(mockBoltApp.client.chat.postMessage.mock.calls.length).toBe(0);
+      });
+
+      it('should not contact slack if DISABLE_SLACK is true (channels)', async () => {
+        mockConfigService.get.mockReturnValue(true);
+        const text = `hello from ${Date.now()}`;
+        await provider.sendText({ channel: '#my-channel', text });
+
+        expect(mockBoltApp.client.users.list.mock.calls.length).toBe(0);
+        expect(mockBoltApp.client.conversations.list.mock.calls.length).toBe(0);
+        expect(mockBoltApp.client.conversations.open.mock.calls.length).toBe(0);
+        expect(mockBoltApp.client.chat.postMessage.mock.calls.length).toBe(0);
       });
     });
 
