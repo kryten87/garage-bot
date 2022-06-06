@@ -6,7 +6,6 @@ import {
   OnModuleInit,
 } from '@nestjs/common';
 import { ReadStream, WriteStream } from 'fs';
-import { spawn } from 'child_process';
 
 const pause = (duration) =>
   new Promise((resolve) => setTimeout(resolve, duration));
@@ -120,27 +119,19 @@ export class GpioService implements OnModuleInit, OnModuleDestroy {
     );
   }
 
-  // @TODO make this private
-  async mkfifo(name: string): Promise<void> {
-    return new Promise((resolve) => {
-      const pipe = spawn('mkfifo', [name]);
-      pipe.on('exit', () => {
-        resolve();
-      });
-    });
+  async openReadPipe(name: string): Promise<ReadStream> {
+    const fd = this.fileSystem.openSync(name, 'r+');
+    return this.fileSystem.createReadStream(null, { fd });
+  }
+
+  async openWritePipe(name: string): Promise<WriteStream> {
+    return this.fileSystem.createWriteStream(name);
   }
 
   // @TODO make this private
   async initializePipes(): Promise<void> {
-    // open the OUTPUT read stream
-    await this.mkfifo(OUTPUT_PIPE);
-    const outputFd = this.fileSystem.openSync(OUTPUT_PIPE, 'r+');
-    this.outputStream = this.fileSystem.createReadStream(null, {
-      fd: outputFd,
-    });
-
-    // open the INPUT write stream
-    this.inputStream = this.fileSystem.createWriteStream(INPUT_PIPE);
+    this.outputStream = await this.openReadPipe(OUTPUT_PIPE);
+    this.inputStream = await this.openWritePipe(INPUT_PIPE);
   }
 
   // @TODO make this private
