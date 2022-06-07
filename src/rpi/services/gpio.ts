@@ -15,9 +15,6 @@ const pause = (duration) =>
 export const INPUT_PIPE = '/tmp/gpio_driver_input';
 export const OUTPUT_PIPE = '/tmp/gpio_driver_output';
 
-// @TODO rename this & make it an env variable
-export const TIMEOUT = 1000;
-
 interface PythonDriverQuery {
   input?: number;
   output?: { [pin: number]: boolean };
@@ -27,6 +24,7 @@ interface PythonDriverQuery {
 @Injectable()
 export class GpioService implements OnModuleInit, OnModuleDestroy {
   private pollingInterval: number;
+  private driverTimeout: number;
   private timeHandle: NodeJS.Timeout;
   private doorSensorPin: number;
   private doorEventHandler: any[] = [];
@@ -45,6 +43,7 @@ export class GpioService implements OnModuleInit, OnModuleDestroy {
     this.pollingInterval = +this.configService.get<number>(
       'SENSOR_POLLING_INTERVAL',
     );
+    this.driverTimeout = +this.configService.get<number>('DRIVER_TIMEOUT');
     this.doorSensorPin = this.configService.get<number>('GPIO_DOOR_SENSOR');
     this.remoteRelay = this.configService.get<number>('GPIO_REMOTE_RELAY');
     this.remoteButtonPressLength = this.configService.get<number>(
@@ -139,7 +138,7 @@ export class GpioService implements OnModuleInit, OnModuleDestroy {
     return new Promise((resolve, reject) => {
       const timeoutHandle = setTimeout(() => {
         reject(new Error('request timed out'));
-      }, TIMEOUT);
+      }, this.driverTimeout);
 
       this.outputStream.once('data', (data) => {
         clearTimeout(timeoutHandle);
