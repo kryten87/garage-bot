@@ -54,9 +54,9 @@ export class GpioService implements OnModuleInit, OnModuleDestroy {
   }
 
   async onModuleInit() {
-    // initialize the pipes for communication
+    console.log('<onModuleInit> initializing pipes');
     await this.initializePipes();
-
+    console.log('<onModuleInit> starting polling');
     this.startPolling();
   }
 
@@ -119,16 +119,19 @@ export class GpioService implements OnModuleInit, OnModuleDestroy {
   }
 
   async openReadPipe(name: string): Promise<ReadStream> {
+    console.log(`<openReadPipe> opening pipe "${name}"`);
     const fd = this.fileSystem.openSync(name, 'r+');
     return this.fileSystem.createReadStream(null, { fd });
   }
 
   async openWritePipe(name: string): Promise<WriteStream> {
+    console.log(`<openwritePipe> opening pipe "${name}"`);
     return this.fileSystem.createWriteStream(name);
   }
 
   // @TODO make this private
   async initializePipes(): Promise<void> {
+    console.log('<initializePipes> opening pipes');
     this.outputStream = await this.openReadPipe(OUTPUT_PIPE);
     this.inputStream = await this.openWritePipe(INPUT_PIPE);
   }
