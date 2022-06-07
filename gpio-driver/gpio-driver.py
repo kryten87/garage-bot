@@ -1,6 +1,7 @@
 import os
 import select
 import json
+from os.path import exists
 
 try:
   import pifacedigitalio
@@ -52,30 +53,27 @@ def setRelay(number, state):
   return True;
 
 def createPipe(pipeName, flags):
-  log(f'creating pipe {pipeName}')
-  os.mkfifo(pipeName)
+  if not exists(pipeName):
+    log(f'creating pipe {pipeName}')
+    os.mkfifo(pipeName)
   return os.open(pipeName,flags)
 
 def getMessage(pipe):
   return os.read(pipe, 20 * 1024);
 
+def initializePipes():
+  log("creating/opening input pipe")
+  inPipe = createPipe(INPUT_PIPE, os.O_RDONLY | os.O_NONBLOCK)
+  log("creating/opening output pipe")
+  outPipe = createPipe(OUTPUT_PIPE, os.O_WRONLY)
+  return inPipe, outPipe
+
+
 if __name__ == "__main__":
-  log("creating input pipe")
-  inputPipe = createPipe(INPUT_PIPE, os.O_RDONLY | os.O_NONBLOCK)
-
   try:
-    log("waiting for output pipe to open")
-    # loop until the output pipe shows up
-    #
-    while True:
-      try:
-        outputPipe = os.open(OUTPUT_PIPE, os.O_WRONLY)
-        break
-      except:
-        # wait for output pipe to get initialized
-        pass
+    log("initializing pipes")
+    inputPipe, outputPipe = initializePipes()
 
-    log("output pipe open; waiting for input")
     try:
       # intialize the poller
       #
@@ -119,9 +117,10 @@ if __name__ == "__main__":
         #
         poll.unregister(inputPipe)
     finally:
-      # close the input pipe
-      #
+      log("closing input pipe")
       os.close(inputPipe)
+      log("closing output pipe")
+      os.close(outputPipe)
   finally:
     # remove both pipes
     #

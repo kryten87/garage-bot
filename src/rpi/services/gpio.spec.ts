@@ -13,6 +13,7 @@ describe('Gpio', () => {
   const remoteButtonRelay = 1;
   const remoteButtonPressLength = 10;
   const pollingInterval = 100;
+  const driverTimeout = 100;
 
   const mockConfig = {
     get: (key: string): string | number => {
@@ -25,6 +26,8 @@ describe('Gpio', () => {
           return remoteButtonPressLength;
         case 'SENSOR_POLLING_INTERVAL':
           return pollingInterval;
+        case 'DRIVER_TIMEOUT':
+          return driverTimeout;
         default:
           throw new Error(`unexpected config key requested: "${key}"`);
       }
@@ -54,8 +57,6 @@ describe('Gpio', () => {
     }).compile();
 
     provider = module.get<GpioService>(GpioService);
-
-    provider.mkfifo = jest.fn();
 
     mockRpio.open.mockClear();
     mockRpio.init.mockClear();

@@ -12,6 +12,11 @@ DRIVER_DIR=gpio-driver
 DRIVER_STAGING_DIR=gpio-driver-temp
 DRIVER_TEMP_DIR=gpio-driver-temp
 
+BRANCH="$1"
+if [ -n "$BRANCH" ]; then
+  echo "[deployment] deploying branch '$BRANCH'"
+fi
+
 echo "[deployment] change to location"
 cd /home/dave
 
@@ -25,6 +30,11 @@ git clone git@gitlab.com:dave137/home-bot.git "$WORK_DIR"
 
 echo "[deployment] enter the directory"
 cd "$WORK_DIR"
+
+if [ -n "$BRANCH" ]; then
+  echo "[deployment] checking out '$BRANCH'"
+  git checkout "$BRANCH"
+fi
 
 # copy the GPIO driver dir
 #

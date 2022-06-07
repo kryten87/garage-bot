@@ -6,7 +6,6 @@ import {
   OnModuleInit,
 } from '@nestjs/common';
 import { ReadStream, WriteStream } from 'fs';
-import { spawn } from 'child_process';
 
 const pause = (duration) =>
   new Promise((resolve) => setTimeout(resolve, duration));
@@ -15,9 +14,6 @@ const pause = (duration) =>
 // responses on the output pipe
 export const INPUT_PIPE = '/tmp/gpio_driver_input';
 export const OUTPUT_PIPE = '/tmp/gpio_driver_output';
-
-// @TODO rename this & make it an env variable
-export const TIMEOUT = 1000;
 
 interface PythonDriverQuery {
   input?: number;
@@ -28,6 +24,7 @@ interface PythonDriverQuery {
 @Injectable()
 export class GpioService implements OnModuleInit, OnModuleDestroy {
   private pollingInterval: number;
+  private driverTimeout: number;
   private timeHandle: NodeJS.Timeout;
   private doorSensorPin: number;
   private doorEventHandler: any[] = [];
@@ -46,6 +43,7 @@ export class GpioService implements OnModuleInit, OnModuleDestroy {
     this.pollingInterval = +this.configService.get<number>(
       'SENSOR_POLLING_INTERVAL',
     );
+    this.driverTimeout = +this.configService.get<number>('DRIVER_TIMEOUT');
     this.doorSensorPin = this.configService.get<number>('GPIO_DOOR_SENSOR');
     this.remoteRelay = this.configService.get<number>('GPIO_REMOTE_RELAY');
     this.remoteButtonPressLength = this.configService.get<number>(
@@ -56,9 +54,9 @@ export class GpioService implements OnModuleInit, OnModuleDestroy {
   }
 
   async onModuleInit() {
-    // initialize the pipes for communication
+    console.log('<onModuleInit> initializing pipes');
     await this.initializePipes();
-
+    console.log('<onModuleInit> starting polling');
     this.startPolling();
   }
 
@@ -120,27 +118,22 @@ export class GpioService implements OnModuleInit, OnModuleDestroy {
     );
   }
 
-  // @TODO make this private
-  async mkfifo(name: string): Promise<void> {
-    return new Promise((resolve) => {
-      const pipe = spawn('mkfifo', [name]);
-      pipe.on('exit', () => {
-        resolve();
-      });
-    });
+  async openReadPipe(name: string): Promise<ReadStream> {
+    console.log(`<openReadPipe> opening pipe "${name}"`);
+    const fd = this.fileSystem.openSync(name, 'r+');
+    return this.fileSystem.createReadStream(null, { fd });
+  }
+
+  async openWritePipe(name: string): Promise<WriteStream> {
+    console.log(`<openwritePipe> opening pipe "${name}"`);
+    return this.fileSystem.createWriteStream(name);
   }
 
   // @TODO make this private
   async initializePipes(): Promise<void> {
-    // open the OUTPUT read stream
-    await this.mkfifo(OUTPUT_PIPE);
-    const outputFd = this.fileSystem.openSync(OUTPUT_PIPE, 'r+');
-    this.outputStream = this.fileSystem.createReadStream(null, {
-      fd: outputFd,
-    });
-
-    // open the INPUT write stream
-    this.inputStream = this.fileSystem.createWriteStream(INPUT_PIPE);
+    console.log('<initializePipes> opening pipes');
+    this.outputStream = await this.openReadPipe(OUTPUT_PIPE);
+    this.inputStream = await this.openWritePipe(INPUT_PIPE);
   }
 
   // @TODO make this private
@@ -148,7 +141,7 @@ export class GpioService implements OnModuleInit, OnModuleDestroy {
     return new Promise((resolve, reject) => {
       const timeoutHandle = setTimeout(() => {
         reject(new Error('request timed out'));
-      }, TIMEOUT);
+      }, this.driverTimeout);
 
       this.outputStream.once('data', (data) => {
         clearTimeout(timeoutHandle);
