@@ -51,8 +51,8 @@ The brains of the bot. Processes input from Slack and outputs the resulting acti
 ✅ 1.3.0 - clean up pipe initialization
   - ✅ Python driver has the responsibility for creating the two pipes if they don't exist
   - ✅ NodeJS code will simply open the pipes as needed
-1.4.0 - improve python driver tests
-1.5.0 - add two-step open/close
+1.4.0 - add two-step open/close
+1.5.0 - change to HTTP driver interface
 1.6.0 - light? camera?
 1.7.0 - end-to-end tests
 1.8.0 - deployment (automated?)
