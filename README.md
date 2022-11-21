@@ -1,27 +1,34 @@
-The Thomas Family Home Bot Project
+The Garage Bot Project
 ==================================
 
 ## Description
 
-The Thomas Family home bot -- performs various home tasks via Slack.
+Provides services to manage a garage door via Slack on a Raspberry Pi:
+notifications when the door opens or closes, plus commands to
+open/close the door.
 
 ## Architecture
 
-### Modules
+A [NestJS](https://nestjs.com/) server to manage communications with Slack (as a
+bot) and a "driver" written in Python to interface with the Raspberry Pi hardware.
 
 #### Slack
 
-Controls communication with Slack via Bolt package. Includes a service which provides the functionality and a controller which handles the in/out.
+Controls communication with Slack via Bolt package. Includes a service which
+provides the functionality and a controller which handles the in/out.
 
 #### RPi
 
-Controls interface with the Raspberry Pi hardware.
-Use [rpi-gpio](https://github.com/JamesBarwell/rpi-gpio.js)?
-Or [rpio](https://github.com/jperkin/node-rpio)?
+Controls interface with the Raspberry Pi hardware. I have an old PiFace board
+which is no longer supported, but for which Python code is available. A simple
+Python application serves as a driver, communicating with the NestJS
+application over Unix pipes.
 
 #### Bot
 
-The brains of the bot. Processes input from Slack and outputs the resulting actions to take. Uses the [@nlpjs/npl](https://www.npmjs.com/package/@nlpjs/nlp) package.
+The brains of the bot. Processes input from Slack and outputs the resulting
+actions to take. Uses the [@nlpjs/npl](https://www.npmjs.com/package/@nlpjs/nlp)
+package.
 
 ### Milestones
 
@@ -63,11 +70,18 @@ Service files go in `/usr/lib/systemd/system`
 
 **Switch to Raspberry Pi A+**
 
-This is an older model. Need to see if we can get it running on that hardware using the Piface Digital 2.
+This is an older model. Need to see if we can get it running on that hardware
+using the Piface Digital 2.
+
+*Nope. A+ is simply not capable of running Node.JS applications. Switching to a Pi 3.*
 
 **PiFace Digital 2**
 
-The PiFace is old and not particularly up to date. There is a NodeJS package, but it's obsolete. The [Python package](https://github.com/piface/pifacedigitalio) might still work. In that case, I need a way for the Python package to handle the IO, and communicate with the NodeJS application.
+The PiFace is old and not particularly up to date. There is a NodeJS package,
+but it's obsolete. The
+[Python package](https://github.com/piface/pifacedigitalio) might still work.
+In that case, I need a way for the Python package to handle the IO, and
+communicate with the NodeJS application.
 
 - HTTP/Socket -- doable, but seems complicated
 - [Named Pipes](https://levelup.gitconnected.com/inter-process-communication-between-node-js-and-python-2e9c4fda928d)
@@ -151,17 +165,3 @@ $ npm run test:e2e
 # test coverage
 $ npm run test:cov
 ```
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
